@@ -54,11 +54,15 @@ export default class DatabaseCore extends DatabaseBase {
 
   constructor(dbPath?: string) {
     super();
-    this.dbPath = dbPath ?? ':memory:';
+    this.dbPath = 'frappe_book';
     this.connectionParams = {
-      client: 'better-sqlite3',
+      client: 'mysql2',
       connection: {
-        filename: this.dbPath,
+        host: '127.0.0.1',
+        port: 3306,
+        user: 'root',
+        password: 'root',
+        database: 'frappe_book',
       },
       useNullAsDefault: true,
       asyncStackTraces: process.env.NODE_ENV === 'development',
@@ -94,7 +98,7 @@ export default class DatabaseCore extends DatabaseBase {
 
   async connect() {
     this.knex = knex(this.connectionParams);
-    await this.knex.raw('PRAGMA foreign_keys=ON');
+    // await this.knex.raw('PRAGMA foreign_keys=ON');
   }
 
   async close() {
@@ -421,7 +425,7 @@ export default class DatabaseCore extends DatabaseBase {
 
   async #getTableColumns(schemaName: string): Promise<string[]> {
     const info: FieldValueMap[] = await this.knex!.raw(
-      `PRAGMA table_info(${schemaName})`
+      `SHOW COLUMNS FROM ??`,[schemaName]
     );
     return info.map((d) => d.name as string);
   }
@@ -441,9 +445,23 @@ export default class DatabaseCore extends DatabaseBase {
   }
 
   async #getForeignKeys(schemaName: string): Promise<string[]> {
-    const foreignKeyList: FieldValueMap[] = await this.knex!.raw(
-      `PRAGMA foreign_key_list(${schemaName})`
-    );
+    const foreignKeyQuery: TemplateStringsArray = `
+          SELECT 
+            CONSTRAINT_NAME, 
+            COLUMN_NAME, 
+            REFERENCED_TABLE_NAME, 
+            REFERENCED_COLUMN_NAME 
+          FROM 
+            information_schema.KEY_COLUMN_USAGE 
+          WHERE 
+            TABLE_NAME = ? 
+            AND TABLE_SCHEMA = ? 
+            AND REFERENCED_TABLE_NAME IS NOT NULL
+        `;
+
+    const databaseName = 'frappe_book'; // Replace with your actual database name
+
+    const foreignKeyList: FieldValueMap[] = await this.knex!.raw(foreignKeyQuery, [schemaName, databaseName]);
     return foreignKeyList.map((d) => d.from as string);
   }
 

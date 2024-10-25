@@ -58,6 +58,7 @@ export type KnexColumnType =
   | 'date'
   | 'datetime'
   | 'time'
+  | 'string'
   | 'binary';
 
 // Returned by pragma table_info

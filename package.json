@@ -31,6 +31,8 @@
     "knex": "^2.4.0",
     "lodash": "^4.17.21",
     "luxon": "^2.5.2",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.11.3",
     "node-fetch": "2",
     "pesa": "^1.1.12",
     "source-map-support": "^0.5.21",

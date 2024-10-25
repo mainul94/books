@@ -5,25 +5,25 @@ import { CUSTOM_EVENTS } from 'utils/messages';
 import { KnexColumnType } from './database/types';
 
 export const sqliteTypeMap: Record<string, KnexColumnType> = {
-  AutoComplete: 'text',
-  Currency: 'text',
+  AutoComplete: 'string',
+  Currency: 'string',
   Int: 'integer',
   Float: 'float',
   Percent: 'float',
   Check: 'boolean',
-  Code: 'text',
+  Code: 'string',
   Date: 'date',
   Datetime: 'datetime',
   Time: 'time',
-  Text: 'text',
-  Data: 'text',
-  Link: 'text',
-  DynamicLink: 'text',
-  Password: 'text',
-  Select: 'text',
-  Attachment: 'text',
-  AttachImage: 'text',
-  Color: 'text',
+  Text: 'string',
+  Data: 'string',
+  Link: 'string',
+  DynamicLink: 'string',
+  Password: 'string',
+  Select: 'string',
+  Attachment: 'string',
+  AttachImage: 'string',
+  Color: 'string',
 };
 
 export const SYSTEM = '__SYSTEM__';

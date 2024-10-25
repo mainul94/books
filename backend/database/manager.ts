@@ -172,14 +172,12 @@ export class DatabaseManager extends DatabaseDemuxBase {
       return true;
     }
 
-    const query = await knex('sqlite_master').where({
-      type: 'table',
-      name: 'PatchRun',
-    });
-    return !query.length;
+    const query = await knex.schema.hasTable('PatchRun');
+    return !query;
   }
 
   async #createBackup() {
+    return
     const { dbPath } = this.db ?? {};
     if (!dbPath || process.env.IS_TEST) {
       return;
