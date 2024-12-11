@@ -70,12 +70,44 @@ import { Shortcuts } from './utils/shortcuts';
 import { routeTo } from './utils/ui';
 import { useKeys } from './utils/vueUtils';
 import { setDarkMode } from 'src/utils/theme';
+import { machineIdSync } from "node-machine-id";
+import axios from "axios";
 
 enum Screen {
   Desk = 'Desk',
   DatabaseSelector = 'DatabaseSelector',
   SetupWizard = 'SetupWizard',
 }
+
+
+/**
+ * Validate the license during app startup.
+ */
+ const validateLicenseWithUUID = async (): Promise<boolean> => {
+  const { licenseKey } = await fyo.doc.getDoc('SystemSettings');
+  // const deviceUUID = machineIdSync();
+
+  if (!licenseKey) {
+    return false;
+  }
+
+  try {
+    const response = await axios.post("http://localhost:8001/api/method/license_management.api.validate_license", {
+      license_key: licenseKey,
+      // device_uuid: deviceUUID,
+    });
+    console.log(response.data);
+    if (response.data.status === "valid") {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+};
+
 
 export default defineComponent({
   name: 'App',
@@ -135,6 +167,8 @@ export default defineComponent({
   },
   async mounted() {
     await this.setInitialScreen();
+    const isValidLicense = await validateLicenseWithUUID();
+    console.log("isValidLicense", isValidLicense);
     const { darkMode } = await fyo.doc.getDoc('SystemSettings');
     setDarkMode(!!darkMode);
     this.darkMode = !!darkMode;
