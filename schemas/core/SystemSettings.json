@@ -65,6 +65,14 @@
       "section": "Default"      
     },
     {
+      "fieldname": "validUntil",
+      "label": "Valid Until",
+      "fieldtype": "Data",
+      "default": "",
+      "readOnly": true,
+      "section": "Default"      
+    },
+    {
       "fieldname": "version",
       "label": "Version",
       "fieldtype": "Data",
