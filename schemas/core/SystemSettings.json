@@ -57,6 +57,22 @@
       "section": "Default"
     },
     {
+      "fieldname": "licenseKey",
+      "label": "Lincese Key",
+      "fieldtype": "Data",
+      "default": "",
+      "readOnly": true,
+      "section": "Default"      
+    },
+    {
+      "fieldname": "validUntil",
+      "label": "Valid Until",
+      "fieldtype": "Data",
+      "default": "",
+      "readOnly": true,
+      "section": "Default"      
+    },
+    {
       "fieldname": "version",
       "label": "Version",
       "fieldtype": "Data",
@@ -68,7 +84,7 @@
       "fieldname": "locale",
       "label": "Locale",
       "fieldtype": "AutoComplete",
-      "default": "en-IN",
+      "default": "en-US",
       "required": true,
       "allowCustom": true,
       "description": "Set the local code. This is used for number formatting.",
@@ -89,7 +105,7 @@
       "fieldname": "currency",
       "label": "Currency",
       "fieldtype": "AutoComplete",
-      "default": "INR",
+      "default": "BDT",
       "readOnly": true,
       "required": true,
       "section": "Number Display"
@@ -107,7 +123,7 @@
       "fieldname": "countryCode",
       "label": "Country Code",
       "fieldtype": "Data",
-      "default": "in",
+      "default": "bd",
       "description": "Country code used to initialize regional settings.",
       "hidden": true
     },
