@@ -2,86 +2,75 @@
   <Row
     :ratio="ratio"
     class="
-      border
-      dark:border-gray-800
-      rounded-t
-      px-2
-      text-gray-600
-      dark:text-gray-400
       w-full
-      flex
-      items-center
-      mt-4
+      px-2
+      mt-2
+      border
+      rounded-t
+      text-gray-600
+      dark:border-gray-800 dark:text-gray-400
     "
   >
     <div
       v-if="tableFields"
       v-for="df in tableFields"
       :key="df.fieldname"
-      class="items-center text-lg flex px-2 py-2"
+      class="text-lg flex m-2"
       :class="{
       'ms-auto': isNumeric(df as Field),
     }"
-      :style="{
-        height: ``,
-      }"
     >
       {{ df.label }}
     </div>
   </Row>
 
   <div
-    class="overflow-y-auto overflow-x-auto custom-scroll custom-scroll-thumb1"
-    style="height: 50vh"
+    class="overflow-auto custom-scroll custom-scroll-thumb1"
+    style="height: calc(90vh - 25rem)"
   >
     <Row
       v-for="row in sinvDoc.items"
       :ratio="ratio"
       class="
+        p-2
         border
-        dark:border-gray-800
         w-full
-        px-2
-        py-2
-        group
-        flex
-        items-center
-        justify-center
         hover:bg-gray-25
-        dark:bg-gray-890
+        dark:border-gray-800 dark:bg-gray-890
       "
     >
-      <SelectedItemRow
+      <ModernPOSSelectedItemRow
         :row="(row as SalesInvoiceItem)"
+        @selected-row="selectedItemRow"
         @run-sinv-formulas="runSinvFormulas"
+        @toggle-modal="$emit('toggleModal')"
       />
     </Row>
   </div>
 </template>
 
 <script lang="ts">
-import FormContainer from '../FormContainer.vue';
-import FormControl from '../Controls/FormControl.vue';
-import Link from '../Controls/Link.vue';
-import Row from '../Row.vue';
+import FormContainer from 'src/components/FormContainer.vue';
+import FormControl from 'src/components/Controls/FormControl.vue';
+import Link from 'src/components/Controls/Link.vue';
+import Row from 'src/components/Row.vue';
 import RowEditForm from 'src/pages/CommonForm/RowEditForm.vue';
-import SelectedItemRow from './SelectedItemRow.vue';
+import ModernPOSSelectedItemRow from './ModernPOSSelectedItemRow.vue';
 import { isNumeric } from 'src/utils';
-import { inject } from 'vue';
-import { defineComponent } from 'vue';
+import { inject, defineComponent } from 'vue';
 import { SalesInvoiceItem } from 'models/baseModels/SalesInvoiceItem/SalesInvoiceItem';
 import { SalesInvoice } from 'models/baseModels/SalesInvoice/SalesInvoice';
 import { Field } from 'schemas/types';
 
 export default defineComponent({
-  name: 'SelectedItemTable',
+  name: 'ModernPOSSelectedItemTable',
   components: {
     FormContainer,
     FormControl,
     Link,
     Row,
     RowEditForm,
-    SelectedItemRow,
+    ModernPOSSelectedItemRow,
   },
   setup() {
     return {
@@ -93,9 +82,10 @@ export default defineComponent({
       isExapanded: false,
     };
   },
+  emits: ['toggleModal', 'selectedRow'],
   computed: {
     ratio() {
-      return [0.1, 1, 0.8, 0.8, 0.8, 0.8, 0.2];
+      return [0.1, 0.8, 0.4, 0.8, 0.8, 0.3];
     },
     tableFields() {
       return [
@@ -119,14 +109,6 @@ export default defineComponent({
           fieldtype: 'Int',
           required: true,
           schemaName: '',
-        },
-        {
-          fieldname: 'unit',
-          label: 'Stock Unit',
-          placeholder: 'Unit',
-          fieldtype: 'Link',
-          required: true,
-          schemaName: 'UOM',
         },
         {
           fieldname: 'rate',
@@ -155,6 +137,9 @@ export default defineComponent({
   methods: {
     async runSinvFormulas() {
       await this.sinvDoc.runFormulas();
+    },
+    selectedItemRow(row: SalesInvoiceItem, field: string) {
+      this.$emit('selectedRow', row, field);
     },
     isNumeric,
   },

@@ -9,15 +9,30 @@ export type ItemSerialNumbers = { [item: string]: string };
 export type DiscountType = 'percent' | 'amount';
 
 export type ModalName =
-  | 'ShiftOpen'
-  | 'ShiftClose'
+  | 'Keyboard'
   | 'Payment'
+  | 'ShiftClose'
   | 'LoyaltyProgram'
   | 'SavedInvoice'
-  | 'RouteToInvoiceList'
+  | 'Alert'
   | 'CouponCode';
 
+export type PosEmits =
+  | 'addItem'
+  | 'toggleView'
+  | 'toggleModal'
+  | 'setCashAmount'
+  | 'setCouponsCount'
+  | 'routeToSinvList'
+  | 'setTransferRefNo'
+  | 'setLoyaltyPoints'
+  | 'setTransferAmount'
+  | 'createTransaction'
+  | 'selectedInvoiceName'
+  | 'setTransferClearanceDate';
+
 export interface POSItem {
+  id?: number;
   image?: string;
   name: string;
   rate: Money;

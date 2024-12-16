@@ -75,6 +75,7 @@ enum Screen {
   Desk = 'Desk',
   DatabaseSelector = 'DatabaseSelector',
   SetupWizard = 'SetupWizard',
+  Activation = 'Activation',
 }
 
 export default defineComponent({
@@ -142,7 +143,6 @@ export default defineComponent({
   methods: {
     async setInitialScreen(): Promise<void> {
       const lastSelectedFilePath = fyo.config.get('lastSelectedFilePath', null);
-
       if (
         typeof lastSelectedFilePath !== 'string' ||
         !lastSelectedFilePath.length

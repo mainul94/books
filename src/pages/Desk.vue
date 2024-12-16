@@ -19,8 +19,17 @@ import { toggleSidebar } from 'src/utils/ui';
         @change-db-file="$emit('change-db-file')"
       />
     </Transition>
-
-    <div
+    <div class="
+        flex flex-1
+        overflow-y-hidden
+        custom-scroll custom-scroll-thumb1
+        bg-white
+        dark:bg-gray-875 justify-center items-center
+        min-w-full
+      " v-if="showActivation">
+      <Activation />
+    </div>
+    <div v-else
       class="
         flex flex-1
         overflow-y-hidden
@@ -80,6 +89,8 @@ import { toggleSidebar } from 'src/utils/ui';
 <script lang="ts">
 import { defineComponent } from 'vue';
 import Sidebar from '../components/Sidebar.vue';
+import Activation from 'src/pages/Activation.vue';
+import { validateLicenseExpiry } from 'src/utils/activation';
 export default defineComponent({
   name: 'Desk',
   components: {
@@ -89,6 +100,18 @@ export default defineComponent({
     darkMode: { type: Boolean, default: false },
   },
   emits: ['change-db-file'],
+  data() {
+    return {
+      showActivation: false
+    } 
+  },
+  async mounted() {
+    const valid: boolean = await validateLicenseExpiry();
+    console.log(valid)
+    if (!valid) {
+      this.showActivation = true;
+    }
+  },
 });
 </script>
 
