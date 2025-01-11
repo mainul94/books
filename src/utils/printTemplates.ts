@@ -13,12 +13,19 @@ import {
   showExportInFolder,
 } from './ui';
 import { Money } from 'pesa';
+import { SalesInvoice } from 'models/baseModels/SalesInvoice/SalesInvoice';
 
 export type PrintTemplateHint = {
   [key: string]: string | PrintTemplateHint | PrintTemplateHint[];
 };
 type PrintTemplateData = Record<string, unknown>;
-type TemplateUpdateItem = { name: string; template: string; type: string };
+type TemplateUpdateItem = {
+  name: string;
+  template: string;
+  type: string;
+  width: number;
+  height: number;
+};
 
 const printSettingsFields = [
   'logo',
@@ -39,6 +46,28 @@ export async function getPrintTemplatePropValues(
   const fyo = doc.fyo;
   const values: PrintValues = { doc: {}, print: {} };
   values.doc = await getPrintTemplateDocValues(doc);
+
+  const totalTax = await (doc as Invoice)?.getTotalTax();
+  const paymentId = await (doc as SalesInvoice).getPaymentIds();
+
+  if (paymentId.length) {
+    const paymentDoc = await fyo.doc.getDoc(
+      ModelNameEnum.Payment,
+      paymentId[0]
+    );
+
+    (values.doc as PrintTemplateData).paymentMethod = paymentDoc.paymentMethod;
+
+    (values.doc as PrintTemplateData).paidAmount = doc.fyo.format(
+      paymentDoc.amount as Money,
+      ModelNameEnum.Currency
+    );
+  }
+
+  (values.doc as PrintTemplateData).subTotal = doc.fyo.format(
+    (doc.grandTotal as Money).sub(totalTax),
+    ModelNameEnum.Currency
+  );
 
   const printSettings = await fyo.doc.getDoc(ModelNameEnum.PrintSettings);
   const printValues = await getPrintTemplateDocValues(
@@ -69,7 +98,28 @@ export async function getPrintTemplatePropValues(
     (doc.grandTotal as Money).float
   );
 
+  (values.doc as PrintTemplateData).date = getDate(doc.date as string);
+
+  if (printSettings.displayTime) {
+    (values.doc as PrintTemplateData).time = getTime(doc.date as string);
+  }
+
   return values;
+}
+
+function getDate(dateString: string): string {
+  const date = new Date(dateString);
+  date.setMonth(date.getMonth() - 1);
+
+  return `${date.toLocaleString('default', {
+    month: 'short',
+  })} ${date.getDate()}, ${date.getFullYear()}`;
+}
+
+function getTime(dateString: string): string {
+  const date = new Date(dateString);
+
+  return date.toTimeString().split(' ')[0];
 }
 
 export function getPrintTemplatePropHints(schemaName: string, fyo: Fyo) {
@@ -392,7 +442,9 @@ function getAllCSSAsStyleElem() {
 }
 
 export async function updatePrintTemplates(fyo: Fyo) {
-  const templateFiles = await ipc.getTemplates();
+  const templateFiles = await ipc.getTemplates(
+    fyo.singles.PrintSettings?.posPrintWidth as number
+  );
   const existingTemplates = (await fyo.db.getAll(ModelNameEnum.PrintTemplate, {
     fields: ['name', 'modified'],
     filters: { isCustom: false },
@@ -417,20 +469,29 @@ export async function updatePrintTemplates(fyo: Fyo) {
 
   const isLogging = fyo.store.skipTelemetryLogging;
   fyo.store.skipTelemetryLogging = true;
-  for (const { name, type, template } of updateList) {
+  for (const { name, type, template, width, height } of updateList) {
     const doc = await getDocFromNameIfExistsElseNew(
       ModelNameEnum.PrintTemplate,
       name
     );
 
-    await doc.set({ name, type, template, isCustom: false });
+    const updateData = {
+      name,
+      type,
+      template,
+      isCustom: false,
+      ...(width ? { width } : {}),
+      ...(height ? { height } : {}),
+    };
+
+    await doc.set(updateData);
     await doc.sync();
   }
   fyo.store.skipTelemetryLogging = isLogging;
 }
 
 function getPrintTemplateUpdateList(
-  { file, template, modified: modifiedString }: TemplateFile,
+  { file, template, modified: modifiedString, width, height }: TemplateFile,
   nameModifiedMap: Record<string, Date>,
   fyo: Fyo
 ): TemplateUpdateItem[] {
@@ -444,6 +505,8 @@ function getPrintTemplateUpdateList(
     }
 
     templateList.push({
+      height,
+      width,
       name,
       type,
       template,

@@ -7,9 +7,9 @@ jobs:
     runs-on: macos-13
     steps:
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '18.19.0'
+          node-version: '20.18.1'
 
       - name: Checkout Books
         uses: actions/checkout@v4
@@ -57,9 +57,9 @@ jobs:
     runs-on: macos-14
     steps:
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '18.19.0'
+          node-version: '20.18.1'
 
       - name: Checkout Books
         uses: actions/checkout@v4
@@ -107,9 +107,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '18.19.0'
+          node-version: '20.18.1'
 
       - name: Checkout Books
         uses: actions/checkout@v4
@@ -155,9 +155,9 @@ jobs:
 
     steps:
       - name: Setup node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '18.19.0'
+          node-version: '20.18.1'
 
       - name: Checkout Books
         uses: actions/checkout@v4

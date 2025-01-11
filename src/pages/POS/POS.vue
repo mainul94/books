@@ -20,7 +20,6 @@
       :default-customer="defaultCustomer"
       :is-pos-shift-open="isPosShiftOpen"
       :items="(items as [] as POSItem[])"
-      :cash-amount="(cashAmount as Money)"
       :sinv-doc="(sinvDoc as SalesInvoice)"
       :disable-pay-button="disablePayButton"
       :open-payment-modal="openPaymentModal"
@@ -39,7 +38,8 @@
       @clear-values="clearValues"
       @set-customer="setCustomer"
       @toggle-modal="toggleModal"
-      @set-cash-amount="setCashAmount"
+      @set-paid-amount="setPaidAmount"
+      @set-payment-method="setPaymentMethod"
       @set-coupons-count="setCouponsCount"
       @route-to-sinv-list="routeToSinvList"
       @set-loyalty-points="setLoyaltyPoints"
@@ -61,7 +61,6 @@
       :default-customer="defaultCustomer"
       :is-pos-shift-open="isPosShiftOpen"
       :items="(items as [] as POSItem[])"
-      :cash-amount="(cashAmount as Money)"
       :sinv-doc="(sinvDoc as SalesInvoice)"
       :disable-pay-button="disablePayButton"
       :open-payment-modal="openPaymentModal"
@@ -81,7 +80,8 @@
       @clear-values="clearValues"
       @set-customer="setCustomer"
       @toggle-modal="toggleModal"
-      @set-cash-amount="setCashAmount"
+      @set-paid-amount="setPaidAmount"
+      @set-payment-method="setPaymentMethod"
       @set-coupons-count="setCouponsCount"
       @route-to-sinv-list="routeToSinvList"
       @apply-pricing-rule="applyPricingRule"
@@ -138,6 +138,7 @@ import {
   ItemQtyMap,
   ItemSerialNumbers,
 } from 'src/components/POS/types';
+import { ValidationError } from 'fyo/utils/errors';
 
 const COMPONENT_NAME = 'POS';
 
@@ -155,7 +156,8 @@ export default defineComponent({
       sinvDoc: computed(() => this.sinvDoc),
       coupons: computed(() => this.coupons),
       itemQtyMap: computed(() => this.itemQtyMap),
-      cashAmount: computed(() => this.cashAmount),
+      paidAmount: computed(() => this.paidAmount),
+      paymentMethod: computed(() => this.paymentMethod),
       transferRefNo: computed(() => this.transferRefNo),
       itemDiscounts: computed(() => this.itemDiscounts),
       transferAmount: computed(() => this.transferAmount),
@@ -188,7 +190,7 @@ export default defineComponent({
       openAppliedCouponsModal: false,
 
       totalQuantity: 0,
-      cashAmount: fyo.pesa(0),
+      paidAmount: fyo.pesa(0),
       itemDiscounts: fyo.pesa(0),
       transferAmount: fyo.pesa(0),
       totalTaxedAmount: fyo.pesa(0),
@@ -202,6 +204,7 @@ export default defineComponent({
       appliedCoupons: [] as AppliedCouponCodes[],
 
       itemSearchTerm: '',
+      paymentMethod: undefined as string | undefined,
       transferRefNo: undefined as string | undefined,
       defaultCustomer: undefined as string | undefined,
       transferClearanceDate: undefined as Date | undefined,
@@ -219,7 +222,7 @@ export default defineComponent({
     isDiscountingEnabled(): boolean {
       return !!fyo.singles.AccountingSettings?.enableDiscounting;
     },
-    isPosShiftOpen: () => !!fyo.singles.POSShift?.isShiftOpen,
+    isPosShiftOpen: () => !!fyo.singles.POSSettings?.isShiftOpen,
     disablePayButton(): boolean {
       if (!this.sinvDoc.items?.length || !this.sinvDoc.party) {
         return true;
@@ -396,8 +399,11 @@ export default defineComponent({
     toggleView() {
       this.tableView = !this.tableView;
     },
-    setCashAmount(amount: Money) {
-      this.cashAmount = amount;
+    setPaidAmount(amount: Money) {
+      this.paidAmount = amount;
+    },
+    setPaymentMethod(method: string) {
+      this.paymentMethod = method;
     },
     setDefaultCustomer() {
       this.defaultCustomer = this.fyo.singles.Defaults?.posCustomer ?? '';
@@ -461,6 +467,10 @@ export default defineComponent({
 
       this.sinvDoc = salesInvoiceDoc;
       this.toggleModal('SavedInvoice', false);
+
+      if (doc.submitted) {
+        this.toggleModal('Payment');
+      }
     },
     setTransferAmount(amount: Money = fyo.pesa(0)) {
       this.transferAmount = amount;
@@ -472,20 +482,26 @@ export default defineComponent({
       this.transferRefNo = ref;
     },
 
-    async addItem(item: POSItem | Item | undefined) {
-      await this.sinvDoc.runFormulas();
-
-      if (!item) {
-        return;
-      }
-
-      const existingItems =
-        this.sinvDoc.items?.filter(
-          (invoiceItem) =>
-            invoiceItem.item === item.name && !invoiceItem.isFreeItem
-        ) ?? [];
-
+    async addItem(item: POSItem | Item | undefined, quantity?: number) {
       try {
+        await this.sinvDoc.runFormulas();
+
+        if (this.sinvDoc.isSubmitted) {
+          throw new ValidationError(
+            t`Cannot add an item to a submitted invoice.`
+          );
+        }
+
+        if (!item) {
+          return;
+        }
+
+        const existingItems =
+          this.sinvDoc.items?.filter(
+            (invoiceItem) =>
+              invoiceItem.item === item.name && !invoiceItem.isFreeItem
+          ) ?? [];
+
         if (item.hasBatch) {
           for (const invItem of existingItems) {
             const itemQty = invItem.quantity ?? 0;
@@ -495,7 +511,9 @@ export default defineComponent({
               ] ?? 0;
 
             if (itemQty < qtyInBatch) {
-              invItem.quantity = (invItem.quantity as number) + 1;
+              invItem.quantity = quantity
+                ? (invItem.quantity as number) + quantity
+                : (invItem.quantity as number) + 1;
               invItem.rate = item.rate as Money;
 
               await this.applyPricingRule();
@@ -523,7 +541,9 @@ export default defineComponent({
             existingItems[0].rate = item.rate as Money;
           }
 
-          existingItems[0].quantity = (existingItems[0].quantity as number) + 1;
+          existingItems[0].quantity = quantity
+            ? (existingItems[0].quantity as number) + quantity
+            : (existingItems[0].quantity as number) + 1;
 
           await this.applyPricingRule();
           await this.sinvDoc.runFormulas();
@@ -545,6 +565,7 @@ export default defineComponent({
       await this.sinvDoc.append('items', {
         rate: item.rate as Money,
         item: item.name,
+        quantity: quantity ? quantity : 1,
       });
 
       if (this.sinvDoc.priceList) {
@@ -561,13 +582,26 @@ export default defineComponent({
       await this.applyPricingRule();
       await this.sinvDoc.runFormulas();
     },
-
-    async createTransaction(shouldPrint = false) {
+    async createTransaction(shouldPrint = false, isPay = false) {
       try {
         await this.validate();
-        await this.submitSinvDoc(shouldPrint);
-        await this.makePayment();
-        await this.makeStockTransfer();
+        await this.submitSinvDoc();
+
+        if (this.sinvDoc.stockNotTransferred) {
+          await this.makeStockTransfer();
+        }
+
+        if (isPay) {
+          await this.makePayment(shouldPrint);
+        }
+
+        if (shouldPrint) {
+          await routeTo(
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+            `/print/${this.sinvDoc.schemaName}/${this.sinvDoc.name}`
+          );
+        }
+
         await this.afterTransaction();
         await this.setItems();
       } catch (error) {
@@ -577,24 +611,28 @@ export default defineComponent({
         });
       }
     },
-    async makePayment() {
+    async makePayment(shouldPrint: boolean) {
       this.paymentDoc = this.sinvDoc.getPayment() as Payment;
-      const paymentMethod = this.cashAmount.isZero() ? 'Transfer' : 'Cash';
+      const paymentMethod = this.paymentMethod;
 
       await this.paymentDoc.set('paymentMethod', paymentMethod);
 
-      if (paymentMethod === 'Transfer') {
+      const paymentMethodDoc = await this.paymentDoc.loadAndGetLink(
+        'paymentMethod'
+      );
+
+      if (paymentMethodDoc?.type !== 'Cash') {
         await this.paymentDoc.setMultiple({
-          amount: this.transferAmount as Money,
+          amount: this.paidAmount as Money,
           referenceId: this.transferRefNo,
           clearanceDate: this.transferClearanceDate,
         });
       }
 
-      if (paymentMethod === 'Cash') {
+      if (paymentMethodDoc?.type === 'Cash') {
         await this.paymentDoc.setMultiple({
           paymentAccount: this.defaultPOSCashAccount,
-          amount: this.cashAmount as Money,
+          amount: this.paidAmount as Money,
         });
       }
 
@@ -609,6 +647,13 @@ export default defineComponent({
       try {
         await this.paymentDoc?.sync();
         await this.paymentDoc?.submit();
+
+        if (shouldPrint) {
+          await routeTo(
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+            `/print/${this.sinvDoc.schemaName}/${this.sinvDoc.name}`
+          );
+        }
       } catch (error) {
         return showToast({
           type: 'error',
@@ -646,20 +691,13 @@ export default defineComponent({
         });
       }
     },
-    async submitSinvDoc(shouldPrint: boolean) {
-      this.sinvDoc.once('afterSubmit', async () => {
+    async submitSinvDoc() {
+      this.sinvDoc.once('afterSubmit', () => {
         showToast({
           type: 'success',
           message: t`Sales Invoice ${this.sinvDoc.name as string} is Submitted`,
           duration: 'short',
         });
-
-        if (shouldPrint) {
-          await routeTo(
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            `/print/${this.sinvDoc.schemaName}/${this.sinvDoc.name}`
-          );
-        }
       });
 
       try {
@@ -688,7 +726,7 @@ export default defineComponent({
       this.setSinvDoc();
       this.itemSerialNumbers = {};
 
-      this.cashAmount = fyo.pesa(0);
+      this.paidAmount = fyo.pesa(0);
       this.transferAmount = fyo.pesa(0);
       await this.setItems();
 

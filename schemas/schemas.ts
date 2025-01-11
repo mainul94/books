@@ -22,6 +22,7 @@ import CollectionRulesItems from './app/CollectionRulesItems.json';
 import CouponCode from './app/CouponCode.json';
 import AppliedCouponCodes from './app/AppliedCouponCodes.json';
 import Payment from './app/Payment.json';
+import PaymentMethod from './app/PaymentMethod.json';
 import PaymentFor from './app/PaymentFor.json';
 import PriceList from './app/PriceList.json';
 import PriceListItem from './app/PriceListItem.json';
@@ -70,7 +71,8 @@ import DefaultCashDenominations from './app/inventory/Point of Sale/DefaultCashD
 import OpeningAmounts from './app/inventory/Point of Sale/OpeningAmounts.json';
 import OpeningCash from './app/inventory/Point of Sale/OpeningCash.json';
 import POSSettings from './app/inventory/Point of Sale/POSSettings.json';
-import POSShift from './app/inventory/Point of Sale/POSShift.json';
+import POSOpeningShift from './app/inventory/Point of Sale/POSOpeningShift.json';
+import POSClosingShift from './app/inventory/Point of Sale/POSClosingShift.json';
 import POSShiftAmounts from './app/inventory/Point of Sale/POSShiftAmounts.json';
 import { Schema, SchemaStub } from './types';
 
@@ -116,6 +118,7 @@ export const appSchemas: Schema[] | SchemaStub[] = [
   CollectionRulesItems as Schema,
 
   Payment as Schema,
+  PaymentMethod as Schema,
   PaymentFor as Schema,
 
   JournalEntry as Schema,
@@ -170,6 +173,7 @@ export const appSchemas: Schema[] | SchemaStub[] = [
   OpeningAmounts as Schema,
   OpeningCash as Schema,
   POSSettings as Schema,
-  POSShift as Schema,
+  POSOpeningShift as Schema,
+  POSClosingShift as Schema,
   POSShiftAmounts as Schema,
 ];

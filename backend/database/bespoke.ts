@@ -8,7 +8,6 @@ import {
 import { ModelNameEnum } from '../../models/types';
 import DatabaseCore from './core';
 import { BespokeFunction } from './types';
-import { DateTime } from 'luxon';
 import { DocItem, ReturnDocItem } from 'models/inventory/types';
 import { safeParseFloat } from 'utils/index';
 import { Money } from 'pesa';
@@ -402,16 +401,13 @@ export class BespokeQueries {
     const sinvNamesQuery = db.knex!(ModelNameEnum.SalesInvoice)
       .select('name')
       .where('isPOS', true)
-      .andWhereBetween('date', [
-        DateTime.fromJSDate(fromDate).toSQLDate(),
-        DateTime.fromJSDate(toDate).toSQLDate(),
-      ]);
+      .andWhereBetween('date', [fromDate.toISOString(), toDate.toISOString()]);
 
     if (lastShiftClosingDate) {
       sinvNamesQuery.andWhere(
         'created',
         '>',
-        DateTime.fromJSDate(lastShiftClosingDate).toUTC().toString()
+        lastShiftClosingDate.toISOString()
       );
     }
 

@@ -43,14 +43,16 @@
     <PaymentModal
       :open-modal="openPaymentModal"
       @toggle-modal="emitEvent('toggleModal', 'Payment')"
-      @set-cash-amount="(amount) => emitEvent('setCashAmount', amount)"
+      @set-paid-amount="(amount) => emitEvent('setPaidAmount', amount)"
+      @set-payment-method="
+        (paymentMethod) => emitEvent('setPaymentMethod', paymentMethod)
+      "
       @set-transfer-ref-no="(ref) => emitEvent('setTransferRefNo', ref)"
-      @set-transfer-amount="(amount) => emitEvent('setTransferAmount', amount)"
       @set-transfer-clearance-date="
         (date) => emitEvent('setTransferClearanceDate', date)
       "
       @create-transaction="
-        (createTransaction) => emitEvent('createTransaction', createTransaction)
+        (print, status) => emitEvent('createTransaction', print, status)
       "
     />
 
@@ -208,7 +210,7 @@
                 >
                   <slot>
                     <p class="uppercase text-lg text-white font-semibold">
-                      {{ t`Pay` }}
+                      {{ t`Buy` }}
                     </p>
                   </slot>
                 </Button>
@@ -253,11 +255,24 @@
             />
 
             <Barcode
-              v-if="fyo.singles.InventorySettings?.enableBarcodes"
+              v-if="
+                fyo.singles.InventorySettings?.enableBarcodes &&
+                !fyo.singles.POSSettings?.weightEnabledBarcode
+              "
               class="w-1/3"
               @item-selected="
                 async (name: string) => {
                   emitEvent('addItem', await getItem(name) as Item);
+                }
+              "
+            />
+
+            <WeightEnabledBarcode
+              v-if="fyo.singles.POSSettings?.weightEnabledBarcode"
+              class="w-1/3"
+              @item-selected="
+                async (name: string,qty:number) => {
+                  emitEvent('addItem', await getItem(name) as Item,qty as number);
                 }
               "
             />
@@ -319,6 +334,7 @@ import { POSItem, PosEmits, ItemQtyMap } from 'src/components/POS/types';
 import { SalesInvoice } from 'models/baseModels/SalesInvoice/SalesInvoice';
 import ModernPOSItemsGrid from 'src/components/POS/Modern/ModernPOSItemsGrid.vue';
 import ModernPOSItemsTable from 'src/components/POS/Modern/ModernPOSItemsTable.vue';
+import WeightEnabledBarcode from 'src/components/Controls/WeightEnabledBarcode.vue';
 import FloatingLabelFloatInput from 'src/components/POS/FloatingLabelFloatInput.vue';
 import { SalesInvoiceItem } from 'models/baseModels/SalesInvoiceItem/SalesInvoiceItem';
 import FloatingLabelCurrencyInput from 'src/components/POS/FloatingLabelCurrencyInput.vue';
@@ -344,12 +360,13 @@ export default defineComponent({
     ClosePOSShiftModal,
     LoyaltyProgramModal,
     ModernPOSItemsTable,
+    WeightEnabledBarcode,
     FloatingLabelFloatInput,
     FloatingLabelCurrencyInput,
     ModernPOSSelectedItemTable,
   },
   props: {
-    cashAmount: Money,
+    paidAmount: Money,
     tableView: Boolean,
     itemDiscounts: Money,
     openAlertModal: Boolean,
@@ -402,10 +419,11 @@ export default defineComponent({
     'toggleModal',
     'setCustomer',
     'clearValues',
-    'setCashAmount',
+    'setPaidAmount',
     'setCouponsCount',
     'routeToSinvList',
     'setLoyaltyPoints',
+    'setPaymentMethod',
     'setTransferRefNo',
     'applyPricingRule',
     'saveInvoiceAction',
@@ -425,7 +443,10 @@ export default defineComponent({
     };
   },
   methods: {
-    emitEvent(eventName: PosEmits, ...args: (string | boolean | Item)[]) {
+    emitEvent(
+      eventName: PosEmits,
+      ...args: (string | boolean | Item | number | Money)[]
+    ) {
       this.$emit(eventName, ...args);
     },
     selectedRow(row: SalesInvoiceItem, field: string) {
