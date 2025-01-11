@@ -407,7 +407,7 @@ export async function getPathAndMakePDF(
   }
 }
 
-function constructPrintDocument(innerHTML: string) {
+export function constructPrintDocument(innerHTML: string) {
   const html = document.createElement('html');
   const head = document.createElement('head');
   const body = document.createElement('body');
