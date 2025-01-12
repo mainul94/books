@@ -6,6 +6,7 @@ import { ProfitAndLoss } from './ProfitAndLoss/ProfitAndLoss';
 import { TrialBalance } from './TrialBalance/TrialBalance';
 import { StockBalance } from './inventory/StockBalance';
 import { StockLedger } from './inventory/StockLedger';
+import { Collections } from './Collections';
 
 export const reports = {
   GeneralLedger,
@@ -16,4 +17,5 @@ export const reports = {
   GSTR2,
   StockLedger,
   StockBalance,
+  Collections,
 } as const;

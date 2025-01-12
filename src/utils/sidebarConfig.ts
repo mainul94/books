@@ -138,6 +138,11 @@ function getReportSidebar() {
         name: 'trial-balance',
         route: '/report/TrialBalance',
       },
+      {
+        label: t`Collections`,
+        name: 'collections',
+        route: '/report/Collections',
+      },
     ],
   };
 }

@@ -82,6 +82,7 @@ export class GeneralLedger extends LedgerReport {
     });
 
     this.reportData = this._convertEntriesToReportData(consolidated);
+    console.log(this.reportData)
     this.loading = false;
   }
 
