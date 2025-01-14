@@ -71,7 +71,21 @@ export class Collections extends Report {
       orderBy: ['date', 'created'],
       order: this.ascending ? 'asc' : 'desc',
     })) as Report[];
+    const invoiceReferences = (await this.fyo.db.getAllRaw(ModelNameEnum.PaymentFor, {
+      fields: ['parent', 'referenceName'],
+      filters: { parent: ['in', entries.map((entry) => entry.name)] },
+    })) as Report[];
+    const invoiceReferencesMap = {};
+    invoiceReferences.forEach((reference) => {
 
+      if (invoiceReferencesMap[reference.parent]) {
+        invoiceReferencesMap[reference.parent].push(reference.referenceName)
+      } {
+        invoiceReferencesMap[reference.parent] = [reference.referenceName]
+      }
+    }
+    );
+    console.log(invoiceReferencesMap)
     this._rawData = entries.map((entry) => ({
       ...entry,
       account: entry.account,
@@ -80,7 +94,8 @@ export class Collections extends Report {
       party: entry.party,
       reverted: Boolean(entry.reverted),
       reverts: entry.reverts,
-      referenceDate: entry.referenceDate?new Date(entry.referenceDate): '',
+      referenceDate: entry.referenceDate ? new Date(entry.referenceDate) : '',
+      references: invoiceReferencesMap[entry.name].join(', ') || '',
     }));
   }
 
@@ -180,6 +195,12 @@ export class Collections extends Report {
     }
   }
 
+
+  static filters: FiltersMap = {
+    party: (doc: Doc) => {
+      return { role: ['in', ['Customer', 'Both']] } as QueryFilter;
+    },
+  };
   getFilters(): Field[] {
     return [
       { fieldtype: 'Link', target: 'Party', label: t`Party`, placeholder: t`Party`, fieldname: 'party' },
@@ -202,6 +223,7 @@ export class Collections extends Report {
       { fieldname: 'referenceId', label: 'Ref. / Cheque No.', placeholder: 'Ref. / Cheque No.', fieldtype: 'Data' },
       { fieldname: 'referenceDate', label: 'Reference Date', placeholder: 'Ref. Date', fieldtype: 'Date' },
       { fieldname: 'amount', label: 'Amount', fieldtype: 'Currency' },
+      { fieldname: 'references', label: 'Reference Invoice', fieldtype: 'Link', target: 'SalesInvoice' },
     ];
   }
 
@@ -211,6 +233,16 @@ export class Collections extends Report {
 
   private async _getQueryFilters(): Promise<QueryFilter> {
     const filters: QueryFilter = {};
+    const stringFilters = ['party'];
+
+    for (const sf of stringFilters) {
+      const value = this[sf];
+      if (value === undefined) {
+        continue;
+      }
+
+      filters[sf] = value as string;
+    }
     if (this.from) {
       filters.date ??= [];
       filters.date.push(['>=', this.from]);
@@ -220,7 +252,6 @@ export class Collections extends Report {
       filters.date.push(['<=', this.to]);
     }
     filters.paymentType = this.paymentType;
-    console.log(filters)
     return filters;
   }
 }
