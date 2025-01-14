@@ -4,15 +4,16 @@ import { ModelNameEnum } from 'models/types';
 import { Report } from 'reports/Report';
 import { ColumnField, GroupedMap, ReportData, ReportRow } from 'reports/types';
 import { QueryFilter } from 'utils/db/types';
-import { safeParseFloat, safeParseInt } from 'utils/index';
+import { safeParseFloat } from 'utils/index';
 import getCommonExportActions from './commonExporter';
 import { Field, FieldTypeEnum } from 'schemas/types';
 import { DateTime } from 'luxon';
+import { sumBy } from 'lodash';
 
 type GroupByKey = 'account' | 'party' | 'referenceName' | 'name' | 'none';
 
 export class Collections extends Report {
-  static title = t`Collections`;
+  static title = t`Collection`;
   static reportName = 'collections';
   usePagination = true;
   loading = false;
@@ -49,7 +50,7 @@ export class Collections extends Report {
     if (sort) {
       this._rawData.sort((a, b) => (this.ascending ? +a.date! - +b.date! : +b.date! - +a.date!));
     }
-
+    let total = 0;
     const map: GroupedMap = new Map();
     for (const entry of this._rawData) {
       const groupingKey = entry[groupBy];
@@ -57,8 +58,16 @@ export class Collections extends Report {
         map.set(groupingKey, []);
       }
       map.get(groupingKey)!.push(entry);
+      total += entry.amount;
     }
-
+    map.set('totals', [
+      {
+        name: -2,
+        paymentNo: t`Total` + ' (' + this.paymentType + ')',
+        date: null,
+        amount: total,
+      },
+    ]);
     return map;
   }
 
@@ -85,9 +94,9 @@ export class Collections extends Report {
       }
     }
     );
-    console.log(invoiceReferencesMap)
     this._rawData = entries.map((entry) => ({
       ...entry,
+      paymentNo: entry.name,
       account: entry.account,
       date: new Date(entry.date),
       amount: Math.abs(safeParseFloat(entry.amount)),
@@ -215,7 +224,7 @@ export class Collections extends Report {
     return [
       { label: '#', fieldtype: 'Int', fieldname: 'index', align: 'right', width: 0.5 },
       { label: t`Date`, fieldtype: 'Date', fieldname: 'date' },
-      { label: t`Payment No`, fieldtype: 'Link', fieldname: 'name', target: 'Payment', width: 1.5 },
+      { label: t`${this.title} No`, fieldtype: 'Link', fieldname: 'paymentNo', target: 'Payment', width: 1.5 },
       { label: t`Party`, fieldtype: 'Link', fieldname: 'party' },
       { label: t`Payment Method`, fieldtype: 'Link', fieldname: 'paymentMethod', target: 'PaymentMethod', width: 1.25 },
       { fieldname: 'account', label: 'From Account', fieldtype: 'Link', target: 'Account' },

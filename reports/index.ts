@@ -7,6 +7,7 @@ import { TrialBalance } from './TrialBalance/TrialBalance';
 import { StockBalance } from './inventory/StockBalance';
 import { StockLedger } from './inventory/StockLedger';
 import { Collections } from './Collections';
+import { Payments } from './Payments';
 
 export const reports = {
   GeneralLedger,
@@ -18,4 +19,5 @@ export const reports = {
   StockLedger,
   StockBalance,
   Collections,
+  Payments,
 } as const;

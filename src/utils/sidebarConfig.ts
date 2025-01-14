@@ -143,6 +143,11 @@ function getReportSidebar() {
         name: 'collections',
         route: '/report/Collections',
       },
+      {
+        label: t`Payments`,
+        name: 'payments',
+        route: '/report/Payments',
+      },
     ],
   };
 }
