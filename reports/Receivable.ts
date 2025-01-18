@@ -4,11 +4,9 @@ import { ModelNameEnum } from 'models/types';
 import { Report } from 'reports/Report';
 import { ColumnField, GroupedMap, ReportData, ReportRow } from 'reports/types';
 import { QueryFilter } from 'utils/db/types';
-import { safeParseFloat } from 'utils/index';
 import getCommonExportActions from './commonExporter';
 import { Field, FieldTypeEnum } from 'schemas/types';
 import { DateTime } from 'luxon';
-import { sumBy } from 'lodash';
 import { RawValueMap } from 'fyo/core/types';
 
 
