@@ -148,6 +148,11 @@ function getReportSidebar() {
         name: 'payments',
         route: '/report/Payments',
       },
+      {
+        label: t`Receivables`,
+        name: 'Receivable',
+        route: '/report/Receivable',
+      },
     ],
   };
 }
