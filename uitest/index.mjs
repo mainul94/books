@@ -13,7 +13,7 @@ const appSourcePath = path.join(root, 'dist_electron', 'build', 'main.js');
   window.setDefaultTimeout(60_000);
 
   test('load app', async (t) => {
-    t.equal(await window.title(), 'Frappe Books', 'title matches');
+    t.equal(await window.title(), 'Leego Books', 'title matches');
 
     await new Promise((r) => window.once('load', () => r()));
     t.ok(true, 'window has loaded');
@@ -21,7 +21,7 @@ const appSourcePath = path.join(root, 'dist_electron', 'build', 'main.js');
 
   test('navigate to database selector', async (t) => {
     /**
-     * When running on local, Frappe Books will open
+     * When running on local, Leego Books will open
      * the last selected database.
      */
     const changeDb = window.getByTestId('change-db');

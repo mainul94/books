@@ -19,7 +19,7 @@ mkdir build_publish
 cd build_publish
 
 # Clone and cd into books
-git clone https://github.com/frappe/books --depth 1
+git clone https://github.com/cloudycamp/books --depth 1
 cd books
 
 # Copy creds to log_creds.txt

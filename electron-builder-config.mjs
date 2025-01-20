@@ -44,7 +44,7 @@ const frappeBooksConfig = {
     publish: ['github'],
   },
   win: {
-    publisherName: 'Frappe Technologies Pvt. Ltd.',
+    publisherName: 'Cloudy Camp Limited.',
     signDlls: true,
     icon: 'build/icon.ico',
     publish: ['github'],

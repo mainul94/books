@@ -1,18 +1,18 @@
 <div align="center" markdown="1">
 
-<img src="https://user-images.githubusercontent.com/29507195/207267672-d422db6c-d89a-4bbe-9822-468a55c15053.png" alt="Frappe Books logo" width="384"/>
+<img src="https://user-images.githubusercontent.com/29507195/207267672-d422db6c-d89a-4bbe-9822-468a55c15053.png" alt="Leego Books logo" width="384"/>
 
 ---
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/frappe/books)](https://github.com/frappe/books/releases)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/cloudycamp/books)](https://github.com/cloudycamp/books/releases)
 ![Platforms](https://img.shields.io/badge/platform-mac%2C%20windows%2C%20linux-yellowgreen)
-[![Publish](https://github.com/frappe/books/actions/workflows/publish.yml/badge.svg)](https://github.com/frappe/books/actions/workflows/publish.yml)
+[![Publish](https://github.com/cloudycamp/books/actions/workflows/publish.yml/badge.svg)](https://github.com/cloudycamp/books/actions/workflows/publish.yml)
 
 Free Desktop book-keeping software for small businesses and freelancers.
 
-[frappe.io/books](https://frappe.io/books/)
+[cloudycamp.io/books](https://cloudycamp.io/books/)
 
-<img src="https://user-images.githubusercontent.com/29507195/207267857-4ae48890-3fb2-4046-80cf-3256b46c72a0.png" alt="Frappe Books Preview"/>
+<img src="https://user-images.githubusercontent.com/29507195/207267857-4ae48890-3fb2-4046-80cf-3256b46c72a0.png" alt="Leego Books Preview"/>
 
 </div>
 
@@ -51,24 +51,24 @@ Free Desktop book-keeping software for small businesses and freelancers.
 
 ### Via Flatpak
 
-<a href='https://flathub.org/apps/io.frappe.books'>
+<a href='https://flathub.org/apps/io.cloudycamp.books'>
     <img width='120' alt='Get it on Flathub' src='https://flathub.org/api/badge?locale=en'/>
 </a>
 
 ### Using Homebrew (for MacOS and Linux)
 
 ```zsh
-brew install --cask frappe-books
+brew install --cask cloudycamp-books
 ```
 
 ### Manual
 
 Download and install the latest release for your platform from the [releases
-page](https://github.com/frappe/books/releases) .
+page](https://github.com/cloudycamp/books/releases) .
 
 ## Development
 
-Frappe Books is built on Vue.js and Electron. It is offline by default and uses
+Leego Books is built on Vue.js and Electron. It is offline by default and uses
 a local SQLite file as the database.
 
 ### Pre-requisites
@@ -81,11 +81,11 @@ Next, you will need to install [yarn](https://classic.yarnpkg.com/lang/en/docs/i
 ### Clone and Run
 
 Once you are through the Pre-requisites, you can run the following commands to
-setup Frappe Books for development and building:
+setup Leego Books for development and building:
 
 ```bash
 # clone the repository
-git clone https://github.com/frappe/books.git
+git clone https://github.com/cloudycamp/books.git
 
 # change directory
 cd books
@@ -96,7 +96,7 @@ yarn
 
 #### Development
 
-To run Frappe Books in development mode (with hot reload, etc):
+To run Leego Books in development mode (with hot reload, etc):
 
 ```bash
 # start the electron app
@@ -114,13 +114,13 @@ sent.
 
 When in dev mode electron runs with the `--inspect` flag which allows an
 external debugger to connect to port 5858. You can use chrome for this by
-visiting `chrome://inspect` while Frappe Books is running in dev mode.
+visiting `chrome://inspect` while Leego Books is running in dev mode.
 
 See more [here](https://www.electronjs.org/docs/latest/tutorial/debugging-main-process#external-debuggers).
 
 #### Build
 
-To build Frappe Books and create an installer:
+To build Leego Books and create an installer:
 
 ```bash
 # start the electron app
@@ -137,11 +137,11 @@ So to build for linux you could use the `--linux` flag like so: `yarn build --li
 
 ## Contributions and Community
 
-If you want to contribute to Frappe Books, please check our [Contribution Guidelines](https://github.com/frappe/books/blob/master/.github/CONTRIBUTING.md). There are many ways you can contribute even if you don't code:
+If you want to contribute to Leego Books, please check our [Contribution Guidelines](https://github.com/cloudycamp/books/blob/master/.github/CONTRIBUTING.md). There are many ways you can contribute even if you don't code:
 
-1. If you find any issues, no matter how small (even typos), you can [raise an issue](https://github.com/frappe/books/issues/new) to inform us.
-2. You can help us with language support by [contributing translations](https://github.com/frappe/books/wiki/Contributing-Translations).
-3. You can join our [telegram group](https://t.me/frappebooks) and share your thoughts.
+1. If you find any issues, no matter how small (even typos), you can [raise an issue](https://github.com/cloudycamp/books/issues/new) to inform us.
+2. You can help us with language support by [contributing translations](https://github.com/cloudycamp/books/wiki/Contributing-Translations).
+3. You can join our [telegram group](https://t.me/legobook) and share your thoughts.
 4. If you're an ardent user you can tell us what you would like to see.
 5. If you have accounting requirements, you can become an ardent user. 🙂
 
@@ -149,9 +149,9 @@ If you want to contribute code then you can fork this repo, make changes and rai
 
 ## Links
 
-- [Telegram Group](https://t.me/frappebooks): Used for discussions and decisions regarding everything Frappe Books.
-- [GitHub Discussions](https://github.com/frappe/books/discussions): Used for discussions around a specific topic.
-- [Frappe Books Blog](https://tech.frappebooks.com/): Sporadically updated dev blog regarding the development of this project.
+- [Telegram Group](https://t.me/legobook): Used for discussions and decisions regarding everything Leego Books.
+- [GitHub Discussions](https://github.com/cloudycamp/books/discussions): Used for discussions around a specific topic.
+- [Leego Books Blog](https://tech.legobook.com/): Sporadically updated dev blog regarding the development of this project.
 
 ## Translation Contributors
 
