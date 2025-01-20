@@ -107,7 +107,6 @@ export default defineComponent({
   },
   async mounted() {
     const valid: boolean = await validateLicenseExpiry();
-    console.log(valid)
     if (!valid) {
       this.showActivation = true;
     }

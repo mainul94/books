@@ -1,10 +1,10 @@
 {
-  "name": "frappe-books",
-  "version": "0.26.0",
+  "name": "lego-books",
+  "version": "3.26.0",
   "description": "Simple book-keeping app for everyone",
   "author": {
-    "name": "Frappe Technologies Pvt. Ltd.",
-    "email": "hello@frappe.io"
+    "name": "Clody Camp Limited.",
+    "email": "info@cloudycamp.com"
   },
   "scripts": {
     "dev": "node build/scripts/dev.mjs",
@@ -94,9 +94,9 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "homepage": "https://frappe.io/books",
+  "homepage": "https://legobook.cloudycamp.com",
   "repository": {
-    "url": "https://github.com/frappe/books"
+    "url": "https://github.com/mainul94/books"
   },
-  "license": "AGPL-3.0-only"
+  "license": "MIT"
 }

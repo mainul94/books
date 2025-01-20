@@ -108,7 +108,7 @@
     </div>
 
     <!-- Report Issue and DB Switcher -->
-    <div class="window-no-drag flex flex-col gap-2 py-2 px-4">
+    <div v-if="showDevMode" class="window-no-drag flex flex-col gap-2 py-2 px-4">
       <button
         class="
           flex
@@ -292,7 +292,7 @@ export default defineComponent({
     reportIssue,
     toggleSidebar,
     openDocumentation() {
-      ipc.openLink('https://docs.frappe.io/' + docsPathRef.value);
+      ipc.openLink('https://docs.cloudycamp.com/legobook/' + docsPathRef.value);
     },
     setActiveGroup() {
       const { fullPath } = this.$router.currentRoute.value;

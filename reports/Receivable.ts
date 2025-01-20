@@ -75,7 +75,6 @@ export class Receivable extends Report {
   }
 
   private async _setRawData(): Promise<void> {
-    const fields = ['*'];
     const salesInvoices = await this._getData('SalesInvoice');
     const purchaseINvoices = await this._getData('PurchaseInvoice');
 
@@ -85,7 +84,6 @@ export class Receivable extends Report {
       if (this.partyType === 'Customer') {
         if (salesInvoices.has(p.name)) {
           outstandingAmount = outstandingAmount.add(salesInvoices.get(p.name).float);
-          console.log(outstandingAmount.float);
         }
         if (purchaseINvoices.has(p.name)) {
           outstandingAmount = outstandingAmount.sub(purchaseINvoices.get(p.name).float);
@@ -106,7 +104,6 @@ export class Receivable extends Report {
         });
       }
     })
-    console.log(salesInvoices);
   }
 
   private _setIndexOnEntries(map: GroupedMap): void {
@@ -272,7 +269,6 @@ export class Receivable extends Report {
         entries.set(entry.party, this.fyo.pesa(entry.outstandingAmount));
       }
     }
-    console.log(entries);
     return entries;
   }
 }

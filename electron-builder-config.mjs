@@ -15,8 +15,8 @@ const buildDirPath = path.join(root, 'dist_electron', 'build');
 const packageDirPath = path.join(root, 'dist_electron', 'bundled');
 
 const frappeBooksConfig = {
-  productName: 'Frappe Books',
-  appId: 'io.frappe.books',
+  productName: 'Lego Books',
+  appId: 'io.cloudycamp.legobooks',
   asarUnpack: '**/*.node',
   extraResources: [
     { from: 'log_creds.txt', to: '../creds/log_creds.txt' },

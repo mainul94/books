@@ -18,7 +18,6 @@ const getEncryptionKey = getDeviceId;
 const validateLicenseExpiry = async (): Promise<boolean> => {
   const licenseKey = fyo.singles.SystemSettings?.licenseKey;
   const validUntil = fyo.singles.SystemSettings?.validUntil;
-  
   if (!(licenseKey && validUntil)) {
     return false;
   }
@@ -32,13 +31,13 @@ const validateLicenseExpiry = async (): Promise<boolean> => {
 };
 
 const validateLicense = async (key: string): Promise<any> => {
-  const response  = await axios.get(`http://localhost:8001/api/method/license_management.api.activate_license?license_key=${key}&device_uuid=${await getDeviceId()}`);
+  const response  = await axios.get(`/api/method/license_management.api.activate_license?license_key=${key}&device_uuid=${await getDeviceId()}`);
   if (response.status !== 200) {
     return response;
   }
   if (response.data.message.status === 'activated') {
     const doc = await fyo.doc.getDoc('SystemSettings');
-    doc.lincenseKey = key;
+    doc.licenseKey = key;
     const secretKey = await getEncryptionKey();
     doc.validUntil = CryptoJS.AES.encrypt(response.data.message.expiration_date, secretKey).toString();
     await doc.sync();

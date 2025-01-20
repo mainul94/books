@@ -9,6 +9,7 @@ import { StockLedger } from './inventory/StockLedger';
 import { Collections } from './Collections';
 import { Payments } from './Payments';
 import { Receivable } from './Receivable';
+import { Payable } from './Payable';
 
 export const reports = {
   GeneralLedger,
@@ -22,4 +23,5 @@ export const reports = {
   Collections,
   Payments,
   Receivable,
+  Payable,
 } as const;

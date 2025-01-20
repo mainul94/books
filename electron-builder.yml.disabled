@@ -1,5 +1,5 @@
-productName: Frappe Books
-appId: io.frappe.books
+productName: Lego Books
+appId: io.cloudycamp.legobooks
 asarUnpack: '**/*.node'
 extraResources:
   [

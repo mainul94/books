@@ -153,6 +153,11 @@ function getReportSidebar() {
         name: 'Receivable',
         route: '/report/Receivable',
       },
+      {
+        label: t`Parables`,
+        name: 'Payable',
+        route: '/report/Payable',
+      },
     ],
   };
 }
@@ -166,7 +171,7 @@ function getCompleteSidebar(): SidebarConfig {
       icon: 'general',
       iconSize: '24',
       iconHeight: 5,
-      hidden: () => !!fyo.singles.SystemSettings?.hideGetStarted,
+      hidden: () => 1// !!fyo.singles.SystemSettings?.hideGetStarted,
     },
     {
       label: t`Dashboard`,
