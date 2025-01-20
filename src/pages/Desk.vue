@@ -105,12 +105,12 @@ export default defineComponent({
       showActivation: false
     } 
   },
-  // async mounted() {
-  //   const valid: boolean = await validateLicenseExpiry();
-  //   if (!valid) {
-  //     this.showActivation = true;
-  //   }
-  // },
+  async mounted() {
+    const valid: boolean = await validateLicenseExpiry();
+    if (!valid) {
+      this.showActivation = true;
+    }
+  },
 });
 </script>
 
