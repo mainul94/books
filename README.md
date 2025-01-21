@@ -4,9 +4,9 @@
 
 ---
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/cloudycamp/books)](https://github.com/cloudycamp/books/releases)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/mainul94/books)](https://github.com/mainul94/books/releases)
 ![Platforms](https://img.shields.io/badge/platform-mac%2C%20windows%2C%20linux-yellowgreen)
-[![Publish](https://github.com/cloudycamp/books/actions/workflows/publish.yml/badge.svg)](https://github.com/cloudycamp/books/actions/workflows/publish.yml)
+[![Publish](https://github.com/mainul94/books/actions/workflows/publish.yml/badge.svg)](https://github.com/mainul94/books/actions/workflows/publish.yml)
 
 Free Desktop book-keeping software for small businesses and freelancers.
 
@@ -64,7 +64,7 @@ brew install --cask cloudycamp-books
 ### Manual
 
 Download and install the latest release for your platform from the [releases
-page](https://github.com/cloudycamp/books/releases) .
+page](https://github.com/mainul94/books/releases) .
 
 ## Development
 
@@ -85,7 +85,7 @@ setup Leego Books for development and building:
 
 ```bash
 # clone the repository
-git clone https://github.com/cloudycamp/books.git
+git clone https://github.com/mainul94/books.git
 
 # change directory
 cd books
@@ -137,10 +137,10 @@ So to build for linux you could use the `--linux` flag like so: `yarn build --li
 
 ## Contributions and Community
 
-If you want to contribute to Leego Books, please check our [Contribution Guidelines](https://github.com/cloudycamp/books/blob/master/.github/CONTRIBUTING.md). There are many ways you can contribute even if you don't code:
+If you want to contribute to Leego Books, please check our [Contribution Guidelines](https://github.com/mainul94/books/blob/master/.github/CONTRIBUTING.md). There are many ways you can contribute even if you don't code:
 
-1. If you find any issues, no matter how small (even typos), you can [raise an issue](https://github.com/cloudycamp/books/issues/new) to inform us.
-2. You can help us with language support by [contributing translations](https://github.com/cloudycamp/books/wiki/Contributing-Translations).
+1. If you find any issues, no matter how small (even typos), you can [raise an issue](https://github.com/mainul94/books/issues/new) to inform us.
+2. You can help us with language support by [contributing translations](https://github.com/mainul94/books/wiki/Contributing-Translations).
 3. You can join our [telegram group](https://t.me/legobook) and share your thoughts.
 4. If you're an ardent user you can tell us what you would like to see.
 5. If you have accounting requirements, you can become an ardent user. 🙂
@@ -150,7 +150,7 @@ If you want to contribute code then you can fork this repo, make changes and rai
 ## Links
 
 - [Telegram Group](https://t.me/legobook): Used for discussions and decisions regarding everything Leego Books.
-- [GitHub Discussions](https://github.com/cloudycamp/books/discussions): Used for discussions around a specific topic.
+- [GitHub Discussions](https://github.com/mainul94/books/discussions): Used for discussions around a specific topic.
 - [Leego Books Blog](https://tech.legobook.com/): Sporadically updated dev blog regarding the development of this project.
 
 ## Translation Contributors

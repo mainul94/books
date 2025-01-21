@@ -3,8 +3,8 @@
 If you are a Leego Books user and want to contribute to improving it _without
 writing code_, there are several things you can do:
 
-- **Inform us of issues** you face while using Leego Books by [raising issues](https://github.com/cloudycamp/books/issues/new).
-- **Add a language** you would like to use Leego Books in by [contributing translation](https://github.com/cloudycamp/books/wiki/Contributing-Translations).
+- **Inform us of issues** you face while using Leego Books by [raising issues](https://github.com/mainul94/books/issues/new).
+- **Add a language** you would like to use Leego Books in by [contributing translation](https://github.com/mainul94/books/wiki/Contributing-Translations).
 - **Share your thoughts** on Leego Books by joining our [Telegram group](https://t.me/legobook).
 - **Use Leego Books** for your accounting requirements and tell people about it.
 
@@ -94,7 +94,7 @@ you to add them for large changes.
 
 - **Documentation**: If the feature being added requires an explanation then
   [documentation](https://docs.cloudycamp.io/books/) should be updated in the
-  [cloudycamp/books_docs](https://github.com/cloudycamp/books_docs) repository.
+  [mainul94/books_docs](https://github.com/mainul94/books_docs) repository.
   _Add a link to the documentation PR in your feature PR._
 - **Tests**: If your features alters business logic then tests should be added.
 
