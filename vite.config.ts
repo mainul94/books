@@ -20,14 +20,7 @@ export default () => {
 
   return defineConfig({
     server: {
-      host, port, strictPort: true,
-       proxy: {
-        '/api': {
-          target: 'https://cloudycamp.com',
-          changeOrigin: true,
-          pathRewrite: { '^/api': '' }
-        }
-      }
+      host, port, strictPort: true
     },
     root: path.resolve(__dirname, './src'),
     plugins: [vue()],

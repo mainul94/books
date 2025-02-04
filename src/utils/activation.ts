@@ -31,7 +31,8 @@ const validateLicenseExpiry = async (): Promise<boolean> => {
 };
 
 const validateLicense = async (key: string): Promise<any> => {
-  const response  = await axios.get(`/api/method/license_management.api.activate_license?license_key=${key}&device_uuid=${await getDeviceId()}`);
+  const response  = await axios.post(`https://cloudycamp.com/api/method/license_management.api.activate_license`, {license_key:key, device_uuid:await getDeviceId()});
+  console.log(response);
   if (response.status !== 200) {
     return response;
   }
@@ -41,6 +42,7 @@ const validateLicense = async (key: string): Promise<any> => {
     const secretKey = await getEncryptionKey();
     doc.validUntil = CryptoJS.AES.encrypt(response.data.message.expiration_date, secretKey).toString();
     await doc.sync();
+    ipc.reloadWindow();
     return response.data.message.status;
   } else if (response.data.message.status) {
     return response.data.message.status;
