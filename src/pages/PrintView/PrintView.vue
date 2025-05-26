@@ -9,7 +9,7 @@
       }" input-class="text-base py-0 h-8" class="w-40" :border="true" :value="templateName ?? ''"
         @change="onTemplateNameChange" />
       <DropdownWithActions :actions="actions" :title="t`More`" />
-      <Button class="text-xs" type="primary" @click="savePDF">
+      <Button class="text-xs" type="primary" @click="savePDF()">
         {{ t`Save as PDF` }}
       </Button>
       <Button class="text-xs" type="primary" @click="printTheDoc">
@@ -233,16 +233,16 @@ export default defineComponent({
 
       this.templateList = list.map(({ name }) => name);
     },
-    async savePDF() {
+    async savePDF(shouldPrint?: boolean) {
       const printContainer = this.$refs.printContainer as {
-        savePDF: (name?: string) => Promise<void>;
+        savePDF: (name?: string, shouldPrint?: boolean) => Promise<void>;
       };
 
       if (!printContainer?.savePDF) {
         return;
       }
 
-      await printContainer.savePDF(this.doc?.name);
+      await printContainer.savePDF(this.doc?.name, shouldPrint);
     },
     printTheDoc() {
       const printContainer = constructPrintDocument(this.$refs.printContainer.$el.children[0].innerHTML);
@@ -257,12 +257,23 @@ export default defineComponent({
         this.schemaName[0].toLowerCase() +
         this.schemaName.slice(1) +
         ModelNameEnum.PrintTemplate;
-      const name = this.fyo.singles.Defaults?.get(defaultName);
-      if (typeof name !== 'string') {
+
+      let templateName;
+
+      if (
+        this.schemaName == ModelNameEnum.SalesInvoice &&
+        (this.doc as Doc).isPOS
+      ) {
+        templateName = this.fyo.singles.Defaults?.posPrintTemplate;
+      } else {
+        templateName = this.fyo.singles.Defaults?.get(defaultName);
+      }
+
+      if (typeof templateName !== 'string') {
         return;
       }
 
-      await this.onTemplateNameChange(name);
+      await this.onTemplateNameChange(templateName);
     },
   },
 });

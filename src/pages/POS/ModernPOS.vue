@@ -56,6 +56,13 @@
       "
     />
 
+    <ReturnSalesInvoiceModal
+      :open-modal="openReturnSalesInvoiceModal"
+      :modal-status="openReturnSalesInvoiceModal"
+      @selected-return-invoice="(value:any) => emitEvent('selectedReturnInvoice', value)"
+      @toggle-modal="emitEvent('toggleModal', 'ReturnSalesInvoice')"
+    />
+
     <AlertModal
       :open-modal="openAlertModal"
       @toggle-modal="emitEvent('toggleModal', 'Alert')"
@@ -106,7 +113,8 @@
 
           <div
             class="
-              p-4
+              h-full
+              p-2
               bg-white
               border
               rounded-md
@@ -169,7 +177,10 @@
             <div class="flex w-full gap-2">
               <div class="w-full">
                 <Button
-                  class="mt-2 w-full bg-violet-500 dark:bg-violet-700 py-5"
+                  class="mt-2 w-full py-5"
+                  :style="{
+                    backgroundColor: fyo.singles.Defaults?.saveButtonColour,
+                  }"
                   :disabled="!sinvDoc?.party || !sinvDoc?.items?.length"
                   @click="$emit('saveInvoiceAction')"
                 >
@@ -180,19 +191,25 @@
                   </slot>
                 </Button>
                 <Button
-                  class="w-full mt-2 bg-blue-500 dark:bg-blue-700 py-5"
+                  class="w-full mt-2 py-5"
+                  :style="{
+                    backgroundColor: fyo.singles.Defaults?.heldButtonColour,
+                  }"
                   @click="emitEvent('toggleModal', 'SavedInvoice', true)"
                 >
                   <slot>
                     <p class="uppercase text-lg text-white font-semibold">
-                      {{ t`held` }}
+                      {{ t`Held` }}
                     </p>
                   </slot>
                 </Button>
               </div>
               <div class="w-full">
                 <Button
-                  class="mt-2 w-full bg-red-500 dark:bg-red-700 py-5"
+                  class="mt-2 w-full py-5"
+                  :style="{
+                    backgroundColor: fyo.singles.Defaults?.cancelButtonColour,
+                  }"
                   :disabled="!sinvDoc?.items?.length"
                   @click="() => $emit('clearValues')"
                 >
@@ -202,9 +219,26 @@
                     </p>
                   </slot>
                 </Button>
-
                 <Button
-                  class="mt-2 w-full bg-green-500 dark:bg-green-700 py-5"
+                  v-if="isReturnInvoiceEnabledReturn"
+                  class="mt-2 w-full py-5"
+                  :style="{
+                    backgroundColor: fyo.singles.Defaults?.returnButtonColour,
+                  }"
+                  @click="emitEvent('toggleModal', 'ReturnSalesInvoice', true)"
+                >
+                  <slot>
+                    <p class="uppercase text-lg text-white font-semibold">
+                      {{ t`Return` }}
+                    </p>
+                  </slot>
+                </Button>
+                <Button
+                  v-else
+                  class="mt-2 w-full py-5"
+                  :style="{
+                    backgroundColor: fyo.singles.Defaults?.buyButtonColour,
+                  }"
                   :disabled="disablePayButton"
                   @click="emitEvent('toggleModal', 'Payment', true)"
                 >
@@ -216,6 +250,21 @@
                 </Button>
               </div>
             </div>
+            <Button
+              v-if="isReturnInvoiceEnabledReturn"
+              class="mt-2 w-full py-5"
+              :style="{
+                backgroundColor: fyo.singles.Defaults?.buyButtonColour,
+              }"
+              :disabled="disablePayButton"
+              @click="emitEvent('toggleModal', 'Payment', true)"
+            >
+              <slot>
+                <p class="uppercase text-lg text-white font-semibold">
+                  {{ t`Buy` }}
+                </p>
+              </slot>
+            </Button>
           </div>
         </div>
       </div>
@@ -329,6 +378,7 @@ import SavedInvoiceModal from './SavedInvoiceModal.vue';
 import Barcode from 'src/components/Controls/Barcode.vue';
 import ClosePOSShiftModal from './ClosePOSShiftModal.vue';
 import LoyaltyProgramModal from './LoyaltyProgramModal.vue';
+import ReturnSalesInvoiceModal from './ReturnSalesInvoiceModal.vue';
 import MultiLabelLink from 'src/components/Controls/MultiLabelLink.vue';
 import { POSItem, PosEmits, ItemQtyMap } from 'src/components/POS/types';
 import { SalesInvoice } from 'models/baseModels/SalesInvoice/SalesInvoice';
@@ -362,6 +412,7 @@ export default defineComponent({
     ModernPOSItemsTable,
     WeightEnabledBarcode,
     FloatingLabelFloatInput,
+    ReturnSalesInvoiceModal,
     FloatingLabelCurrencyInput,
     ModernPOSSelectedItemTable,
   },
@@ -380,6 +431,7 @@ export default defineComponent({
     openSavedInvoiceModal: Boolean,
     openLoyaltyProgramModal: Boolean,
     openAppliedCouponsModal: Boolean,
+    openReturnSalesInvoiceModal: Boolean,
     totalQuantity: {
       type: Number,
       default: 0,
@@ -430,6 +482,7 @@ export default defineComponent({
     'createTransaction',
     'setTransferAmount',
     'selectedInvoiceName',
+    'selectedReturnInvoice',
     'setTransferClearanceDate',
   ],
   data() {
@@ -441,6 +494,10 @@ export default defineComponent({
 
       itemSearchTerm: '',
     };
+  },
+  computed: {
+    isReturnInvoiceEnabledReturn: () =>
+      fyo.singles.AccountingSettings?.enableInvoiceReturns ?? undefined,
   },
   methods: {
     emitEvent(

@@ -15,6 +15,7 @@
       :border="true"
       :value="posClosingShiftDoc?.closingCash ?? []"
       :read-only="false"
+      @row-change="setClosingCashAmount"
     />
 
     <h2 class="mt-6 mb-2 text-lg dark:text-gray-100 font-medium">
@@ -28,6 +29,7 @@
       :border="true"
       :value="posClosingShiftDoc?.closingAmounts"
       :read-only="true"
+      @row-change="setClosingCashAmount"
     />
 
     <div class="mt-4 grid grid-cols-2 gap-4 items-end">
@@ -146,11 +148,26 @@ export default defineComponent({
 
       this.posClosingShiftDoc.closingCash = [];
 
-      this.posOpeningShiftDoc?.openingCash?.map(async (row) => {
+      this.posClosingShiftDoc?.closingCash?.map(async (row) => {
         await this.posClosingShiftDoc?.append('closingCash', {
           count: row.count,
           denomination: row.denomination as Money,
         });
+      });
+    },
+    setClosingCashAmount() {
+      if (!this.posClosingShiftDoc?.closingAmounts) {
+        return;
+      }
+
+      this.posClosingShiftDoc.closingAmounts.map((row) => {
+        if (row.paymentMethod === 'Cash') {
+          row.closingAmount = this.posClosingShiftDoc
+            ?.closingCashAmount as Money;
+          row.differenceAmount = row.closingAmount.sub(
+            row.expectedAmount as Money
+          );
+        }
       });
     },
     async seedClosingAmounts() {
@@ -209,10 +226,6 @@ export default defineComponent({
           this.posOpeningShiftDoc?.name
         );
         await this.posClosingShiftDoc?.sync();
-        await this.posOpeningShiftDoc?.setAndSync(
-          'closingShift',
-          this.posClosingShiftDoc?.name
-        );
         await transferPOSCashAndWriteOff(
           fyo,
           this.posClosingShiftDoc as POSClosingShift
@@ -220,6 +233,7 @@ export default defineComponent({
 
         await this.fyo.singles.POSSettings?.setAndSync('isShiftOpen', false);
         this.$emit('toggleModal', 'ShiftClose');
+        ipc.reloadWindow();
       } catch (error) {
         return showToast({
           type: 'error',

@@ -1,8 +1,13 @@
 <div align="center" markdown="1">
+<br/>
 
 <img src="https://user-images.githubusercontent.com/29507195/207267672-d422db6c-d89a-4bbe-9822-468a55c15053.png" alt="Leego Books logo" width="384"/>
 
----
+<br/>
+
+<h1>Frappe Books</h1>
+
+**Modern Accounting Made Simple**
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/mainul94/books)](https://github.com/mainul94/books/releases)
 ![Platforms](https://img.shields.io/badge/platform-mac%2C%20windows%2C%20linux-yellowgreen)
@@ -16,40 +21,52 @@ Free Desktop book-keeping software for small businesses and freelancers.
 
 </div>
 
-## Index
+<div align="center">
+<img src="https://user-images.githubusercontent.com/29507195/207267857-4ae48890-3fb2-4046-80cf-3256b46c72a0.png" alt="Frappe Books Preview"/>
+</div>
+<br />
+<div align="center">
+	<a href="https://frappe.io/books">Website</a>
+	-
+	<a href="https://docs.frappe.io/books">Documentation</a>
+</div>
+
+## Frappe Books
+
+Frappe Books is an open-source accounting software aimed at simplifying financial management for businesses. With its clean and user-friendly interface, it streamlines accounting tasks for small and medium-sized enterprises, offering a seamless solution for modern businesses to manage their finances with ease.
 
 <details>
-<summary><code>[show/hide]</code></summary>
-
-1. [Features](#features)
-2. [Installation](#installation)
-3. [Development](#development)
-4. [Contributions and Community](#contributions-and-community)
-5. [Links](#links)
-6. [Translation Contributors](#translation-contributors)
-7. [License](#license)
+<summary>Screenshots</summary>
+<br/>
+<img  alt="Pos" src="https://github.com/user-attachments/assets/f75116b4-cf5f-45ee-9927-ba380fa56a46" />
+    <br/><br/>
+    <img  alt="General Ledger" src="https://github.com/user-attachments/assets/58d8bcdf-1576-4008-b010-7054fb64a12d" />
+    <br/><br/>
+    <img  alt="Profit and Loss" src="https://github.com/user-attachments/assets/11bd67d1-d808-496b-ac4d-ef68c18b9419" />
 
 </details>
 
-## Features
+### Motivation
 
-1. Double-entry accounting
-1. Point of Sale
-1. Invoicing
-1. Billing
-1. Payments
-1. Journal Entries
-1. Dashboard
-1. Works Offline
-1. Financial Reports
-   - General Ledger
-   - Profit and Loss Statement
-   - Balance Sheet
-   - Trial Balance
+Frappe Books addresses a market gap where small businesses face expensive, complex accounting tools. It offers an intuitive, open-source solution that combines simplicity with essential features, empowering businesses to manage finances effectively—even offline.
 
-## Installation
+### Key Features
 
-### Via Flatpak
+- **Dashboard**: Provides an overview of key financial data and performance metrics.
+- **Point of Sale**: Simplifies retail transactions with an integrated POS system for easy sales processing.
+- **Works Offline**: Enables users to continue working without an internet connection and sync later.
+- **Double-entry accounting**: Ensures accurate financial tracking by recording each transaction in two accounts.
+- **Entries**
+  - **Invoicing**: Allows businesses to create and manage professional invoices effortlessly.
+  - **Billing**: Billing processes by generating bills and tracking payments.
+  - **Payments**: Records and tracks payments received and made.
+  - **Journal Entries**: Records financial transactions in the general ledger with detailed notes and adjustments.
+- **Financial Reports**
+  - **General Ledger**: Centralized record of all financial transactions, providing a comprehensive view of accounts.
+  - **Profit and Loss Statement**: Summarizes revenues, costs, and expenses to show business profitability.
+  - **Balance Sheet**: Displays a company’s assets, liabilities, and equity at a specific point in time.
+  - **Trial Balance**: Verifies the accuracy of accounting records by ensuring that debits and credits are balanced.
+    <br/>
 
 <a href='https://flathub.org/apps/io.cloudycamp.books'>
     <img width='120' alt='Get it on Flathub' src='https://flathub.org/api/badge?locale=en'/>
@@ -61,7 +78,7 @@ Free Desktop book-keeping software for small businesses and freelancers.
 brew install --cask cloudycamp-books
 ```
 
-### Manual
+### Via Flatpak (Linux)
 
 Download and install the latest release for your platform from the [releases
 page](https://github.com/mainul94/books/releases) .
@@ -135,7 +152,7 @@ computer) check the _Building_ section at
 
 So to build for linux you could use the `--linux` flag like so: `yarn build --linux`.
 
-## Contributions and Community
+## Want to Just Try Out or Contribute?
 
 If you want to contribute to Leego Books, please check our [Contribution Guidelines](https://github.com/mainul94/books/blob/master/.github/CONTRIBUTING.md). There are many ways you can contribute even if you don't code:
 
@@ -147,7 +164,28 @@ If you want to contribute to Leego Books, please check our [Contribution Guideli
 
 If you want to contribute code then you can fork this repo, make changes and raise a PR. ([see how to](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork))
 
-## Links
+## Translation Contributors
+
+| Language              | Contributors                                                                                                                                                                                                                                      |     |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
+| Arabic                | [taha2002](https://github.com/taha2002), [Faridget](https://github.com/faridget)                                                                                                                                                                  |     |
+| Catalan               | Dídac E. Jiménez                                                                                                                                                                                                                                  |     |
+| Chinese - Simplified  | [wcxu21](https://github.com/wcxu21), [wolone](https://github.com/wolone), [Ji Qu](https://github.com/winkidney)                                                                                                                                   |     |
+| Chinese - Traditional | [Ethan Deng](https://github.com/ethandengs)                                                                                                                                                                                                       |     |
+| Danish                | [Tummas Joensen](https://github.com/slang123)                                                                                                                                                                                                     |     |
+| Dutch                 | [RijckAlex](https://github.com/RijckAlex), [Stan M](https://github.com/stxm)                                                                                                                                                                      |     |
+| French                | [DeepL](https://www.deepl.com/), [mael-chouteau](https://github.com/mael-chouteau), [joandreux](https://github.com/joandreux)                                                                                                                     |     |
+| German                | [DeepL](https://www.deepl.com/), [barredterra](https://github.com/barredterra), [promexio](https://github.com/promexio), [C2H6-383](https://github.com/C2H6-383), [0xflotus](https://github.com/0xflotus), [Tim](https://github.com/Rocket-Quack) |     |
+| Gujarati              | [dhruvilxcode](https://github.com/dhruvilxcode), [4silvertooth](https://github.com/4silvertooth)                                                                                                                                                  |     |
+| Hindi                 | [bnsinghgit](https://github.com/bnsinghgit)                                                                                                                                                                                                       |     |
+| Indonesian            | [Aji Prakoso](https://github.com/jipraks)                                                                                                                                                                                                         |     |
+| Korean                | [Isaac-Kwon](https://github.com/Isaac-Kwon)                                                                                                                                                                                                       |     |
+| Portuguese            | [DeepL](https://www.deepl.com/), [Valdir Amaral](https://github.com/valdir-amaral)                                                                                                                                                                |     |
+| Spanish               | [talmax1124](https://github.com/talmax1124), [delbertf](https://github.com/delbertf)                                                                                                                                                              |     |
+| Swedish               | [papplo](https://github.com/papplo), [Crims-on](https://github.com/Crims-on)                                                                                                                                                                      |     |
+| Turkish               | Eyuq, [XTechnology-TR](https://github.com/XTechnology-TR)                                                                                                                                                                                         |     |
+
+## Learn and connect
 
 - [Telegram Group](https://t.me/legobook): Used for discussions and decisions regarding everything Leego Books.
 - [GitHub Discussions](https://github.com/mainul94/books/discussions): Used for discussions around a specific topic.

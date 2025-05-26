@@ -40,7 +40,7 @@ import { safeParseFloat } from 'utils/index';
 import { PriceList } from './baseModels/PriceList/PriceList';
 import { InvoiceItem } from './baseModels/InvoiceItem/InvoiceItem';
 import { SalesInvoiceItem } from './baseModels/SalesInvoiceItem/SalesInvoiceItem';
-import { ItemQtyMap, POSItem } from 'src/components/POS/types';
+import { ItemQtyMap } from 'src/components/POS/types';
 import { ValuationMethod } from './inventory/types';
 import {
   getRawStockLedgerEntries,
@@ -288,8 +288,7 @@ export function getMakeReturnDocAction(fyo: Fyo): Action {
     condition: (doc: Doc) =>
       (!!fyo.singles.AccountingSettings?.enableInvoiceReturns ||
         !!fyo.singles.InventorySettings?.enableStockReturns) &&
-      doc.isSubmitted &&
-      !doc.isReturn,
+      doc.isSubmitted,
     action: async (doc: Doc) => {
       let returnDoc: Invoice | StockTransfer | undefined;
 
@@ -841,7 +840,7 @@ export async function removeLoyaltyPoint(doc: Doc) {
 
 export async function validateQty(
   sinvDoc: SalesInvoice,
-  item: POSItem | Item | undefined,
+  item: Item | undefined,
   existingItems: InvoiceItem[]
 ) {
   if (!item) {
@@ -849,25 +848,59 @@ export async function validateQty(
   }
 
   let itemName = item.name as string;
-  const itemQtyMap = await getItemQtyMap(sinvDoc);
+  const itemhasBatch = await sinvDoc.fyo.getValue(
+    ModelNameEnum.Item,
+    item.item as string,
+    'hasBatch'
+  );
+
+  const itemQtyMap: ItemQtyMap = await getItemQtyMap(sinvDoc);
 
   if (item instanceof SalesInvoiceItem) {
     itemName = item.item as string;
+  }
+
+  if (itemhasBatch) {
+    if (!item.batch) {
+      throw new ValidationError(t`Please select a batch first`);
+    }
+  }
+
+  const trackItem = await sinvDoc.fyo.getValue(
+    ModelNameEnum.Item,
+    item.item as string,
+    'trackItem'
+  );
+
+  if (!trackItem) {
+    return;
   }
 
   if (!itemQtyMap[itemName] || itemQtyMap[itemName].availableQty === 0) {
     throw new ValidationError(t`Item ${itemName} has Zero Quantity`);
   }
 
-  if (
-    (existingItems && !itemQtyMap[itemName]) ||
-    itemQtyMap[itemName].availableQty < (existingItems[0]?.quantity as number)
-  ) {
-    existingItems[0].quantity = itemQtyMap[itemName].availableQty;
-
-    throw new ValidationError(
-      t`Item ${itemName} only has ${itemQtyMap[itemName].availableQty} Quantity`
-    );
+  if (item.batch) {
+    if (
+      (existingItems && !itemQtyMap[itemName]) ||
+      itemQtyMap[itemName][item.batch as string] <
+        (existingItems[0]?.quantity as number)
+    ) {
+      throw new ValidationError(
+        t`Item ${itemName} only has ${
+          itemQtyMap[itemName][item.batch as string]
+        } Quantity in batch ${item.batch as string}`
+      );
+    }
+  } else {
+    if (
+      (existingItems && !itemQtyMap[itemName]) ||
+      itemQtyMap[itemName].availableQty < (existingItems[0]?.quantity as number)
+    ) {
+      throw new ValidationError(
+        t`Item ${itemName} only has ${itemQtyMap[itemName].availableQty} Quantity`
+      );
+    }
   }
 
   return;
@@ -984,7 +1017,7 @@ export async function getPricingRule(
       continue;
     }
 
-    const filtered = await filterPricingRules(
+    const filtered = filterPricingRules(
       doc as SalesInvoice,
       pricingRuleDocsForItem,
       item.quantity as number,
@@ -1047,30 +1080,17 @@ export async function getItemRateFromPriceList(
   return plItem?.rate;
 }
 
-export async function filterPricingRules(
+export function filterPricingRules(
   doc: SalesInvoice,
   pricingRuleDocsForItem: PricingRule[],
   quantity: number,
   amount: Money
-): Promise<PricingRule[] | []> {
+): PricingRule[] | [] {
   const filteredPricingRules: PricingRule[] = [];
 
   for (const pricingRuleDoc of pricingRuleDocsForItem) {
-    let freeItemQty: number | undefined;
-
-    if (pricingRuleDoc?.freeItem) {
-      const itemQtyMap = await getItemQtyMap(doc);
-      freeItemQty = itemQtyMap[pricingRuleDoc.freeItem]?.availableQty;
-    }
-
     if (
-      canApplyPricingRule(
-        pricingRuleDoc,
-        doc.date as Date,
-        quantity,
-        amount,
-        freeItemQty ?? 0
-      )
+      canApplyPricingRule(pricingRuleDoc, doc.date as Date, quantity, amount)
     ) {
       filteredPricingRules.push(pricingRuleDoc);
     }
@@ -1082,22 +1102,8 @@ export function canApplyPricingRule(
   pricingRuleDoc: PricingRule,
   sinvDate: Date,
   quantity: number,
-  amount: Money,
-  freeItemQty: number
+  amount: Money
 ): boolean {
-  const freeItemQuantity = pricingRuleDoc.freeItemQuantity;
-
-  if (pricingRuleDoc.isRecursive) {
-    freeItemQty = quantity / (pricingRuleDoc.recurseEvery as number);
-  }
-
-  // Filter by Quantity
-  if (pricingRuleDoc.freeItem && freeItemQuantity! >= freeItemQty) {
-    throw new ValidationError(
-      t`Free item '${pricingRuleDoc.freeItem}' does not have a specified quantity`
-    );
-  }
-
   if (
     (pricingRuleDoc.minQuantity as number) > 0 &&
     quantity < (pricingRuleDoc.minQuantity as number)
@@ -1128,21 +1134,22 @@ export function canApplyPricingRule(
   }
 
   // Filter by Validity
-  if (
-    pricingRuleDoc.validFrom &&
-    new Date(sinvDate.setHours(0, 0, 0, 0)).toISOString() <
-      pricingRuleDoc.validFrom.toISOString()
-  ) {
-    return false;
+  if (sinvDate) {
+    if (
+      pricingRuleDoc.validFrom &&
+      new Date(sinvDate).toISOString() < pricingRuleDoc.validFrom.toISOString()
+    ) {
+      return false;
+    }
+
+    if (
+      pricingRuleDoc.validTo &&
+      new Date(sinvDate).toISOString() > pricingRuleDoc.validTo.toISOString()
+    ) {
+      return false;
+    }
   }
 
-  if (
-    pricingRuleDoc.validTo &&
-    new Date(sinvDate.setHours(0, 0, 0, 0)).toISOString() >
-      pricingRuleDoc.validTo.toISOString()
-  ) {
-    return false;
-  }
   return true;
 }
 
@@ -1169,23 +1176,19 @@ export function canApplyCouponCode(
   // Filter by Validity
   if (
     couponCodeData.validFrom &&
-    new Date(sinvDate.setHours(0, 0, 0, 0)).toISOString() <
-      couponCodeData.validFrom.toISOString()
+    new Date(sinvDate).toISOString() < couponCodeData.validFrom.toISOString()
   ) {
     return false;
   }
 
   if (
     couponCodeData.validTo &&
-    new Date(sinvDate.setHours(0, 0, 0, 0)).toISOString() >
-      couponCodeData.validTo.toISOString()
+    new Date(sinvDate).toISOString() > couponCodeData.validTo.toISOString()
   ) {
     return false;
   }
-
   return true;
 }
-
 export async function removeUnusedCoupons(sinvDoc: SalesInvoice) {
   if (!sinvDoc.coupons?.length) {
     return;

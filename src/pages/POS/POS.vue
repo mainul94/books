@@ -32,6 +32,7 @@
       :open-saved-invoice-modal="openSavedInvoiceModal"
       :open-loyalty-program-modal="openLoyaltyProgramModal"
       :open-applied-coupons-modal="openAppliedCouponsModal"
+      :open-return-sales-invoice-modal="openReturnSalesInvoiceModal"
       @add-item="addItem"
       @toggle-view="toggleView"
       @set-sinv-doc="setSinvDoc"
@@ -49,6 +50,7 @@
       @save-invoice-action="saveInvoiceAction"
       @set-transfer-amount="setTransferAmount"
       @selected-invoice-name="selectedInvoiceName"
+      @selected-return-invoice="selectedReturnInvoice"
       @set-transfer-clearance-date="setTransferClearanceDate"
     />
     <ModernPOS
@@ -74,6 +76,7 @@
       :open-saved-invoice-modal="openSavedInvoiceModal"
       :open-loyalty-program-modal="openLoyaltyProgramModal"
       :open-applied-coupons-modal="openAppliedCouponsModal"
+      :open-return-sales-invoice-modal="openReturnSalesInvoiceModal"
       @add-item="addItem"
       @toggle-view="toggleView"
       @set-sinv-doc="setSinvDoc"
@@ -91,6 +94,7 @@
       @save-invoice-action="saveInvoiceAction"
       @set-transfer-amount="setTransferAmount"
       @selected-invoice-name="selectedInvoiceName"
+      @selected-return-invoice="selectedReturnInvoice"
       @set-transfer-clearance-date="setTransferClearanceDate"
     />
   </div>
@@ -188,6 +192,7 @@ export default defineComponent({
       openSavedInvoiceModal: false,
       openLoyaltyProgramModal: false,
       openAppliedCouponsModal: false,
+      openReturnSalesInvoiceModal: false,
 
       totalQuantity: 0,
       paidAmount: fyo.pesa(0),
@@ -368,9 +373,18 @@ export default defineComponent({
       await this.afterSync();
     },
     async setItems() {
+      const filters: Record<string, boolean> = {};
+      const itemVisibility = this.fyo.singles.POSSettings?.itemVisibility;
+
+      if (itemVisibility === 'Inventory Items') {
+        filters.trackItem = true;
+      } else {
+        filters.trackItem = false;
+      }
+
       const items = (await fyo.db.getAll(ModelNameEnum.Item, {
         fields: [],
-        filters: { trackItem: true },
+        filters,
       })) as Item[];
 
       this.items = [] as POSItem[];
@@ -396,6 +410,20 @@ export default defineComponent({
         });
       }
     },
+    async selectedReturnInvoice(invoiceName: string) {
+      const salesInvoiceDoc = (await this.fyo.doc.getDoc(
+        ModelNameEnum.SalesInvoice,
+        invoiceName
+      )) as SalesInvoice;
+
+      let returnDoc = (await salesInvoiceDoc.getReturnDoc()) as SalesInvoice;
+
+      if (!returnDoc || !returnDoc.name) {
+        return;
+      }
+
+      this.sinvDoc = returnDoc;
+    },
     toggleView() {
       this.tableView = !this.tableView;
     },
@@ -419,7 +447,7 @@ export default defineComponent({
     },
     setSinvDoc() {
       this.sinvDoc = this.fyo.doc.getNewDoc(ModelNameEnum.SalesInvoice, {
-        account: 'Debtors',
+        account: this.fyo.singles.POSSettings?.defaultAccount,
         party: this.sinvDoc.party ?? this.defaultCustomer,
         isPOS: true,
       }) as SalesInvoice;
@@ -481,16 +509,23 @@ export default defineComponent({
     setTransferRefNo(ref: string) {
       this.transferRefNo = ref;
     },
+    validateInvoice() {
+      if (this.sinvDoc.isSubmitted) {
+        throw new ValidationError(
+          t`Cannot add an item to a submitted invoice.`
+        );
+      }
 
+      if (this.sinvDoc.returnAgainst) {
+        throw new ValidationError(
+          t`Unable to add an item to the return invoice.`
+        );
+      }
+    },
     async addItem(item: POSItem | Item | undefined, quantity?: number) {
       try {
         await this.sinvDoc.runFormulas();
-
-        if (this.sinvDoc.isSubmitted) {
-          throw new ValidationError(
-            t`Cannot add an item to a submitted invoice.`
-          );
-        }
+        this.validateInvoice();
 
         if (!item) {
           return;
@@ -502,35 +537,53 @@ export default defineComponent({
               invoiceItem.item === item.name && !invoiceItem.isFreeItem
           ) ?? [];
 
+        const itemsHsncode = (await this.fyo.getValue(
+          'Item',
+          item?.name as string,
+          'hsnCode'
+        )) as number;
+
         if (item.hasBatch) {
+          const isTrackItem =
+            this.fyo.singles.POSSettings?.itemVisibility == 'Inventory Items';
+
           for (const invItem of existingItems) {
             const itemQty = invItem.quantity ?? 0;
-            const qtyInBatch =
-              this.itemQtyMap[invItem.item as string][
-                invItem.batch as string
-              ] ?? 0;
 
-            if (itemQty < qtyInBatch) {
+            if (!isTrackItem) {
               invItem.quantity = quantity
                 ? (invItem.quantity as number) + quantity
                 : (invItem.quantity as number) + 1;
-              invItem.rate = item.rate as Money;
+            } else {
+              const qtyInBatch =
+                this.itemQtyMap[invItem.item as string][
+                  invItem.batch as string
+                ] ?? 0;
 
-              await this.applyPricingRule();
-              await this.sinvDoc.runFormulas();
-              await validateQty(
-                this.sinvDoc as SalesInvoice,
-                item,
-                existingItems as InvoiceItem[]
-              );
-
-              return;
+              if (itemQty < qtyInBatch) {
+                invItem.quantity = quantity
+                  ? (invItem.quantity as number) + quantity
+                  : (invItem.quantity as number) + 1;
+                invItem.rate = item.rate as Money;
+              }
             }
+
+            await this.applyPricingRule();
+            await this.sinvDoc.runFormulas();
+            await validateQty(
+              this.sinvDoc as SalesInvoice,
+              item as Item,
+              existingItems as InvoiceItem[]
+            );
+
+            return;
           }
 
           await this.sinvDoc.append('items', {
             rate: item.rate as Money,
             item: item.name,
+            quantity: quantity ? quantity : 1,
+            hsnCode: itemsHsncode,
           });
 
           return;
@@ -541,53 +594,62 @@ export default defineComponent({
             existingItems[0].rate = item.rate as Money;
           }
 
-          existingItems[0].quantity = quantity
-            ? (existingItems[0].quantity as number) + quantity
-            : (existingItems[0].quantity as number) + 1;
+          await existingItems[0].set(
+            'quantity',
+            quantity
+              ? (existingItems[0].quantity as number) + quantity
+              : (existingItems[0].quantity as number) + 1
+          );
 
           await this.applyPricingRule();
           await this.sinvDoc.runFormulas();
           await validateQty(
             this.sinvDoc as SalesInvoice,
-            item,
+            item as Item,
             existingItems as InvoiceItem[]
           );
 
           return;
         }
+        await this.sinvDoc.append('items', {
+          rate: item.rate as Money,
+          item: item.name,
+          quantity: quantity ? quantity : 1,
+          hsnCode: itemsHsncode,
+        });
+
+        if (this.sinvDoc.priceList) {
+          let itemData = this.sinvDoc.items?.filter(
+            (val) => val.item == item.name
+          ) as SalesInvoiceItem[];
+
+          itemData[0].rate = await getItemRateFromPriceList(
+            itemData[0],
+            this.sinvDoc.priceList
+          );
+        }
+
+        await this.applyPricingRule();
+        await this.sinvDoc.runFormulas();
       } catch (error) {
         return showToast({
           type: 'error',
           message: t`${error as string}`,
         });
       }
-
-      await this.sinvDoc.append('items', {
-        rate: item.rate as Money,
-        item: item.name,
-        quantity: quantity ? quantity : 1,
-      });
-
-      if (this.sinvDoc.priceList) {
-        let itemData = this.sinvDoc.items?.filter(
-          (val) => val.item == item.name
-        ) as SalesInvoiceItem[];
-
-        itemData[0].rate = await getItemRateFromPriceList(
-          itemData[0],
-          this.sinvDoc.priceList
-        );
-      }
-
-      await this.applyPricingRule();
-      await this.sinvDoc.runFormulas();
     },
     async createTransaction(shouldPrint = false, isPay = false) {
       try {
+        this.sinvDoc.date = new Date();
         await this.validate();
         await this.submitSinvDoc();
 
-        if (this.sinvDoc.stockNotTransferred) {
+        const itemVisibility = this.fyo.singles.POSSettings?.itemVisibility;
+
+        if (
+          this.sinvDoc.stockNotTransferred ||
+          itemVisibility === 'Inventory Items'
+        ) {
           await this.makeStockTransfer();
         }
 
@@ -613,6 +675,10 @@ export default defineComponent({
     },
     async makePayment(shouldPrint: boolean) {
       this.paymentDoc = this.sinvDoc.getPayment() as Payment;
+      if (!this.paymentDoc) {
+        return null;
+      }
+
       const paymentMethod = this.paymentMethod;
 
       await this.paymentDoc.set('paymentMethod', paymentMethod);
@@ -623,7 +689,7 @@ export default defineComponent({
 
       if (paymentMethodDoc?.type !== 'Cash') {
         await this.paymentDoc.setMultiple({
-          amount: this.paidAmount as Money,
+          amount: this.paidAmount.float,
           referenceId: this.transferRefNo,
           clearanceDate: this.transferClearanceDate,
         });
@@ -632,7 +698,7 @@ export default defineComponent({
       if (paymentMethodDoc?.type === 'Cash') {
         await this.paymentDoc.setMultiple({
           paymentAccount: this.defaultPOSCashAccount,
-          amount: this.paidAmount as Money,
+          amount: this.paidAmount.float,
         });
       }
 
@@ -668,6 +734,16 @@ export default defineComponent({
       }
 
       for (const item of shipmentDoc.items) {
+        const trackItem = await fyo.getValue(
+          ModelNameEnum.Item,
+          item.item as string,
+          'trackItem'
+        );
+
+        if (!trackItem) {
+          continue;
+        }
+
         item.location = fyo.singles.POSSettings?.inventory;
         item.serialNumber =
           this.itemSerialNumbers[item.item as string] ?? undefined;
@@ -718,8 +794,10 @@ export default defineComponent({
     },
     async afterTransaction() {
       await this.setItemQtyMap();
-      await this.clearValues();
-      this.setSinvDoc();
+      if (this.sinvDoc.isSubmitted) {
+        await this.clearValues();
+        this.setSinvDoc();
+      }
       this.toggleModal('Payment', false);
     },
     async clearValues() {
@@ -747,7 +825,7 @@ export default defineComponent({
       this.setTotalTaxedAmount();
     },
     async validate() {
-      validateSinv(this.sinvDoc as SalesInvoice, this.itemQtyMap);
+      await validateSinv(this.sinvDoc as SalesInvoice, this.itemQtyMap);
       await validateShipment(this.itemSerialNumbers);
     },
     async applyPricingRule() {
@@ -767,6 +845,31 @@ export default defineComponent({
 
       await this.sinvDoc.appendPricingRuleDetail(hasPricingRules);
       await this.sinvDoc.applyProductDiscount();
+
+      const outOfStockFreeItems: string[] = [];
+      const itemQtyMap = await getItemQtyMap(this.sinvDoc as SalesInvoice);
+
+      hasPricingRules.map((pRule) => {
+        const freeItemQty =
+          itemQtyMap[pRule.pricingRule.freeItem as string]?.availableQty;
+
+        if (freeItemQty <= 0) {
+          this.sinvDoc.items = this.sinvDoc.items?.filter(
+            (val) => !(val.isFreeItem && val.item == pRule.pricingRule.freeItem)
+          );
+
+          outOfStockFreeItems.push(pRule.pricingRule.freeItem as string);
+        }
+      });
+
+      if (!outOfStockFreeItems.length) {
+        return;
+      }
+
+      showToast({
+        type: 'error',
+        message: t`Free items out of stock: ${outOfStockFreeItems.join(', ')}`,
+      });
     },
     async routeToSinvList() {
       if (!this.sinvDoc.items?.length) {

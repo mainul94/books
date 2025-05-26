@@ -32,6 +32,7 @@ export class Defaults extends Doc {
   // Print Templates
   salesQuotePrintTemplate?: string;
   salesInvoicePrintTemplate?: string;
+  posPrintTemplate?: string;
   purchaseInvoicePrintTemplate?: string;
   journalEntryPrintTemplate?: string;
   paymentPrintTemplate?: string;
@@ -42,6 +43,16 @@ export class Defaults extends Doc {
   // Point of Sale
   posCashDenominations?: DefaultCashDenominations[];
   posCustomer?: string;
+
+  //Buttons
+  saveButtonColour?: string;
+  submitButtonColour?: string;
+  cancelButtonColour?: string;
+  heldButtonColour?: string;
+  returnButtonColour?: string;
+  buyButtonColour?: string;
+  payButtonColour?: string;
+  payAndPrintButtonColour?: string;
 
   static commonFilters = {
     // Auto Payments
@@ -75,6 +86,7 @@ export class Defaults extends Doc {
     // Print Templates
     salesQuotePrintTemplate: () => ({ type: ModelNameEnum.SalesQuote }),
     salesInvoicePrintTemplate: () => ({ type: ModelNameEnum.SalesInvoice }),
+    posPrintTemplate: () => ({ type: ModelNameEnum.SalesInvoice }),
     purchaseInvoicePrintTemplate: () => ({
       type: ModelNameEnum.PurchaseInvoice,
     }),
@@ -96,7 +108,7 @@ export class Defaults extends Doc {
   }
 
   getPointOfSaleHidden() {
-    return () => !this.fyo.singles.InventorySettings?.enablePointOfSale;
+    return () => !this.fyo.singles.AccountingSettings?.enablePointOfSale;
   }
 
   hidden: HiddenMap = {
@@ -110,6 +122,14 @@ export class Defaults extends Doc {
     stockMovementPrintTemplate: this.getInventoryHidden(),
     posCashDenominations: this.getPointOfSaleHidden(),
     posCustomer: this.getPointOfSaleHidden(),
+    saveButtonColour: this.getPointOfSaleHidden(),
+    cancelButtonColour: this.getPointOfSaleHidden(),
+    submitButtonColour: this.getPointOfSaleHidden(),
+    heldButtonColour: this.getPointOfSaleHidden(),
+    returnButtonColour: this.getPointOfSaleHidden(),
+    buyButtonColour: this.getPointOfSaleHidden(),
+    payButtonColour: this.getPointOfSaleHidden(),
+    payAndPrintButtonColour: this.getPointOfSaleHidden(),
   };
 }
 
